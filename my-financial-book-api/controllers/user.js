@@ -50,7 +50,8 @@ async function login(data) {
                 statusCode: 200,
                 message: {
                   message: "Login successful",
-                  token: token
+                  token: token,
+                  ...omitPassword(userExists.get())
                 }
               };
             } else {
@@ -84,15 +85,113 @@ async function validateToken(req, res, next) {
     if (err) {
       return err;
     } else {
-      req.userId = decoded.id;
+      req.userId = decoded.sub;
       next();
     }
   });
 }
 
+async function getUser(data) {
+  try {
+    if(!data.userId) throw new Error("User Id is required");
+    const userExists = await models.User.findByPk(data.userId);
+    if (!userExists) throw new Error("User not Exists");
+    return {
+      ...omitPassword(userExists.get())
+    }
+  } catch(error) {
+    console.log(error);
+    throw error;
+  }
+}
+
+function omitPassword(user) {
+  const { password, ...userWithoutPassword } = user;
+  return userWithoutPassword;
+}
+
+async function updateUser(data, userId) {
+  try {
+    const userExists = await models.User.findByPk(userId);
+    if (!userExists) throw new Error("User not Exists");
+    const user = await models.User.update(data, { where: { id: userId }});
+    return user;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
+
+
+async function passwordReset(email, password) {
+  try {
+    const user = await models.User.findOne({
+      where: { email },
+    });
+    if (!user) {
+      throw new Error("User not found");
+    }
+    
+    const passwordHash = await bcrypt.hashSync(password, 10);
+    const result = await models.User.update(
+      {
+          password: passwordHash,
+      },
+      { where: { id: user.id } }
+      );
+
+    return {
+      id: user.id,
+      email: email,
+    };
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
+}
+
+const checkRole = (roles) => {
+  return async (req, res, next) => {
+    try {
+      const user = await models.User.findByPk(req.userId); // assuming userId is set in req object
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      if (!roles.includes(user.role)) {
+        return res.status(403).json({ message: 'Access denied' });
+      }
+
+      next();
+    } catch (error) {
+      console.error('Error in role middleware:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  };
+};
+
+async function listUsers() {
+  try {
+    const users = await models.User.findAll();
+    const result = users.map(ele => {
+      return {
+        ...omitPassword(ele.get())
+      }
+    })
+    return result;
+  } catch(error) {
+    console.log(error);
+    throw error;
+  }
+}
 
 module.exports = {
     register,
     login,
-    validateToken
+    validateToken,
+    getUser,
+    updateUser,
+    passwordReset,
+    checkRole,
+    listUsers
 }

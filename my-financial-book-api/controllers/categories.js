@@ -1,9 +1,12 @@
 const models =  require('../models');
 
 
-async function listCategories() {
+async function listCategories({ categoryType }) {
     try {
-        const categories = await models.Category.findAll()
+        let categoryTypeExists = await models.CategoryType.findOne({ where: { name: categoryType } });
+        const categories = await models.Category.findAll({
+            where: { categoryTypeId: categoryTypeExists.id }
+        });
         return categories;
     } catch (error) {
         console.log(error);
@@ -26,23 +29,7 @@ async function listSubCategories(data) {
     }
 }
 
-async function listLineItems(data) {
-    try {
-        if (!data.subCategoryId) throw new Error('SubCategoryId is required');
-        const subCategoryExists = await models.SubCategory.findByPk(data.subCategoryId);
-        if (!subCategoryExists) throw new Error('SubCategory does not exists');
-        const lineItems = await models.LineItems.findAll({
-            where: { subCategoryId: data.subCategoryId }
-        })
-        return lineItems;
-    } catch (error) {
-         console.log(error);
-         throw error;
-    }
-}
-
 module.exports = {
     listCategories,
-    listSubCategories,
-    listLineItems
+    listSubCategories
 }
