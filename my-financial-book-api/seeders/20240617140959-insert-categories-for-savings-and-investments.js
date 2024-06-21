@@ -50,49 +50,49 @@ module.exports = {
         {
           id: 34,
           name: 'Stock Market Investments',
-          categoryTypeId: 4,
+          categoryTypeId: 3,
           createdAt: new Date(),
           updatedAt: new Date()
         },
         {
           id: 35,
           name: 'Fixed-Income Investments',
-          categoryTypeId: 4,
+          categoryTypeId: 3,
           createdAt: new Date(),
           updatedAt: new Date()
         },
         {
           id: 36,
           name: 'Real Estate Investments',
-          categoryTypeId: 4,
+          categoryTypeId: 3,
           createdAt: new Date(),
           updatedAt: new Date()
         },
         {
           id: 37,
           name: 'Retirement Investments',
-          categoryTypeId: 4,
+          categoryTypeId: 3,
           createdAt: new Date(),
           updatedAt: new Date()
         },
         {
           id: 38,
           name: 'Alternative Investments',
-          categoryTypeId: 4,
+          categoryTypeId: 3,
           createdAt: new Date(),
           updatedAt: new Date()
         },
         {
           id: 39,
           name: 'Business Investments',
-          categoryTypeId: 4,
+          categoryTypeId: 3,
           createdAt: new Date(),
           updatedAt: new Date()
         },
         {
           id: 40,
           name: 'Education Investments',
-          categoryTypeId: 4,
+          categoryTypeId: 3,
           createdAt: new Date(),
           updatedAt: new Date()
         }

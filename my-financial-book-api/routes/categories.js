@@ -2,7 +2,7 @@ const { listCategories, listSubCategories } = require('../controllers/categories
 const Joi = require('joi');
 
 const categoryListingSchema = Joi.object({
-    categoryType: Joi.string().valid('Income', 'Expense').required()
+    categoryType: Joi.string().valid('Income', 'Expense', 'SavingsAndInvestments').required()
   });
 
 async function categoriesListing(req, res) {

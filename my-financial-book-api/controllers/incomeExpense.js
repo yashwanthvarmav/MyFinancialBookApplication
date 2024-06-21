@@ -1,3 +1,4 @@
+const { query } = require('express');
 const models = require('../models')
 
 async function createIncomeorExpense(data, userId) {
@@ -87,8 +88,14 @@ async function updateIncomeorExpense(data, id) {
 async function getIncomeorExpense (data, userId) {
     try {
         let result
+        let queryObj = {}
+        /* if (data.categoryId) {
+            queryObj = {
+                id:data.categoryId
+            }
+        } */
         if (data.categoryType === 'Income') {
-            result = await models.Incomes.findAll({
+            result = await models.Incomes.findAndCountAll({
                 where: { userId },
                 include: [
                     {
@@ -97,14 +104,15 @@ async function getIncomeorExpense (data, userId) {
                         include: [
                             {
                                 model: models.Category,
-                                attributes: ['id', 'name']
+                                attributes: ['id', 'name'],
+                                // where: queryObj
                             }
                         ]
                     }
                 ]
             })
         } else if (data.categoryType === 'Expense') {
-            result = await models.Expense.findAll({
+            result = await models.Expense.findAndCountAll({
                 where: { userId },
                 include: [
                     {
@@ -120,23 +128,29 @@ async function getIncomeorExpense (data, userId) {
                 ]
             })
         }
-        const response = result.map(ele => {
-            return ({
-                id: ele.id,
-                Title: ele.Title,
-                SubCategory: {
-                    id: ele.SubCategory.id,
-                    name: ele.SubCategory.name
-                },
-                Category: ele.SubCategory.Category,
-                description: ele.description,
-                amount: ele.amount,
-                date: ele.date,
-                createdAt: ele.createdAt,
-                updatedAt: ele.updatedAt
+        let response = [];
+        if (result.count > 0) {
+            response = result.rows.map(ele => {
+                return ({
+                    id: ele.id,
+                    Title: ele.Title,
+                    SubCategory: {
+                        id: ele.SubCategory.id,
+                        name: ele.SubCategory.name
+                    },
+                    Category: ele.SubCategory.Category,
+                    description: ele.description,
+                    amount: ele.amount,
+                    date: ele.date,
+                    createdAt: ele.createdAt,
+                    updatedAt: ele.updatedAt
+                })
             })
-        })
-        return response;
+        }
+        return {
+            count: result.count,
+            response
+        };
     } catch(error) {
         console.log(error);
         throw error;
