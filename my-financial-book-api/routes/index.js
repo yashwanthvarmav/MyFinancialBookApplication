@@ -3,7 +3,8 @@ const router = express.Router();
 const { registerUser, loginUser, getProfile, updateProfile, resetPassword, userListing } = require('./user')
 const { validateToken, checkRole } = require('../controllers/user')
 const { categoriesListing, subcategoriesListing } = require('./categories')
-const { createDetails, updateDetails, getDetails, deleteDetails } = require('./incomeExpense') 
+const { createDetails, updateDetails, getDetails, deleteDetails, getIncome } = require('./incomeExpense')
+const { createSavingsInvestments, getSavingsInvestments, updateSavingsInvestments, deleteSavingsInvestments } = require('./savingsInvestments')
 
 router.post('/register', registerUser);
 router.post('/login', loginUser);
@@ -14,11 +15,18 @@ router.post('/reset-password', resetPassword);
 router.get('/categories', validateToken, categoriesListing)
 router.get('/subCategories', validateToken, subcategoriesListing)
 
-router.post('/addDetails', validateToken, checkRole(['User']), createDetails);
-router.put('/updateDetails/:id', validateToken, checkRole(['User']), updateDetails);
-router.get('/getDetails', validateToken, checkRole(['User']), getDetails);
-router.delete('/deleteDetails/:categoryType/:id', validateToken, checkRole(['User']), deleteDetails);
+router.post('/addIncomeExpense', validateToken, checkRole(['User']), createDetails);
+router.put('/updateIncomeExpense/:id', validateToken, checkRole(['User']), updateDetails);
+router.get('/getIncomeExpense', validateToken, checkRole(['User']), getDetails);
+router.delete('/deleteIncomeExpense/:categoryType/:id', validateToken, checkRole(['User']), deleteDetails);
+
+router.post('/addSavingsInvestments', validateToken, checkRole(['User']), createSavingsInvestments);
+router.get('/getSavingsInvestments', validateToken, checkRole(['User']), getSavingsInvestments)
+router.put('/updateSavingsInvestments/:id', validateToken, checkRole(['User']), updateSavingsInvestments);
+router.delete('/deleteSavingsInvestments/:id', validateToken, checkRole(['User']), deleteSavingsInvestments);
+
 
 router.get('/users', validateToken, checkRole(['Admin']), userListing);
+router.get('/income', validateToken, checkRole(['Admin']), getIncome);
 
 module.exports = router;

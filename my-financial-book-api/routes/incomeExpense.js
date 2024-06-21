@@ -1,5 +1,5 @@
 const Joi = require('joi');
-const { createIncomeorExpense, updateIncomeorExpense, getIncomeorExpense, deleteIncomeorExpense } = require('../controllers/incomeExpense');
+const { createIncomeorExpense, updateIncomeorExpense, getIncomeorExpense, deleteIncomeorExpense, getIncomeListing } = require('../controllers/incomeExpense');
 const { categoryListingSchema } = require('./categories')
 
 const createDetailsSchema = Joi.object({
@@ -19,6 +19,11 @@ const updateDetailsSchema = Joi.object({
     amount: Joi.number(),
     date: Joi.date()
 });
+
+const getDetailsSchema = Joi.object({
+    categoryType: Joi.string().valid('Income', 'Expense').required(),
+    categoryId: Joi.string(),
+  });
 
 async function createDetails(req, res) {
     try {
@@ -57,7 +62,7 @@ async function updateDetails(req, res) {
 async function getDetails(req, res) {
     try {
         let data = req.query;
-        const { error, value } = categoryListingSchema.validate(data);
+        const { error, value } = getDetailsSchema.validate(data);
         if (error) {
             throw new Error(error.details[0].message);
         }
@@ -83,10 +88,23 @@ async function deleteDetails(req, res) {
     }
 }
 
+async function getIncome(req, res) {
+    try {
+        const result = await getIncomeListing(req.query);
+        res.send(result);
+    } catch(error) {
+        res.statusCode = 400;
+        res.send({
+            error: error.message
+        })
+    }
+}
+
 
 module.exports = {
     createDetails,
     updateDetails,
     getDetails,
-    deleteDetails
+    deleteDetails,
+    getIncome
 }
