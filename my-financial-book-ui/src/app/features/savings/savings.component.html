@@ -1,0 +1,72 @@
+<nz-layout>
+    <nz-content style="margin: 24px 16px; padding: 24px; background: #fff; min-height: 85vh">
+        <div class="w-100 d-flex justify-content-end">
+            <button class="button-wrapper" nz-button nzType="primary" (click)="showModal()">
+        <span class="button-wrraper-icon"
+          ><i class="zmdi zmdi-plus-circle"></i
+        ></span>
+
+        Add Saving's
+      </button>
+        </div>
+
+        <nz-modal [(nzVisible)]="isModalVisible" nzTitle="Add/Edit Saving" (nzOnCancel)="handleCancel()" (nzOnOk)="handleOk()">
+            <ng-container *nzModalContent>
+                <form nz-form [formGroup]="savingForm">
+                    <nz-form-item>
+                        <nz-form-label nzSm="6" nzXs="24" nzFor="date">Date</nz-form-label>
+                        <nz-form-control nzSm="14" nzXs="24">
+                            <nz-date-picker formControlName="date" nzFormat="yyyy-MM-dd"></nz-date-picker>
+                        </nz-form-control>
+                    </nz-form-item>
+                    <nz-form-item>
+                        <nz-form-label nzSm="6" nzXs="24" nzFor="amount">Amount</nz-form-label>
+                        <nz-form-control nzSm="14" nzXs="24">
+                            <input nz-input formControlName="amount" type="number" placeholder="Enter Amount" />
+                        </nz-form-control>
+                    </nz-form-item>
+                    <nz-form-item>
+                        <nz-form-label nzSm="6" nzXs="24" nzFor="description">Description</nz-form-label>
+                        <nz-form-control nzSm="14" nzXs="24">
+                            <input nz-input formControlName="description" type="text" placeholder="Enter Description" />
+                        </nz-form-control>
+                    </nz-form-item>
+                </form>
+            </ng-container>
+        </nz-modal>
+
+        <nz-table #basicTable [nzData]="savingEntries">
+            <thead>
+                <tr>
+                    <th nzWidth="20%">Date</th>
+                    <th nzWidth="20%">Amount</th>
+                    <th nzWidth="40%">Description</th>
+                    <th nzWidth="20%">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let saving of savingEntries">
+                    <td>{{ saving.date | date : "yyyy-MM-dd" }}</td>
+                    <td>{{ saving.amount }}</td>
+                    <td>{{ saving.description }}</td>
+                    <td>
+                        <!-- <button nz-button nzType="primary" nzSize="small" (click)="editEntry(saving)">
+              Edit
+            </button>
+                        <button nz-button nzType="primary" nzDanger nzSize="small" (click)="deleteEntry(saving)">
+              Delete
+            </button> -->
+                        <div class="d-flex">
+                            <div class="delete-icon-wrapper edit-icon-wrapper" (click)="editEntry(saving)">
+                                <i class="zmdi zmdi-edit"></i>
+                            </div>
+                            <div class="delete-icon-wrapper" (click)="deleteEntry(saving)">
+                                <i class="zmdi zmdi-delete"></i>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </nz-table>
+    </nz-content>
+</nz-layout>

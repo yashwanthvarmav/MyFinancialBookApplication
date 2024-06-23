@@ -1,0 +1,83 @@
+<!-- <nz-layout>
+    <nz-header>
+        <div class="header-content">Analytics Dashboard</div>
+    </nz-header>
+    <nz-content>
+        <div class="content-wrapper">
+            <div nz-row [nzGutter]="16">
+                <div nz-col nzSpan="6">
+                    <nz-card [nzBordered]="true" [@fadeIn]>
+                        <nz-statistic [nzValue]="totalIncome" nzTitle="Total Income" [nzValueStyle]="{ color: '#3f8600' }"></nz-statistic>
+                        <nz-progress [nzPercent]="incomePercent" nzStrokeColor="#3f8600" nzStrokeWidth="6"></nz-progress>
+                    </nz-card>
+                </div>
+                <div nz-col nzSpan="6">
+                    <nz-card [nzBordered]="true" [@fadeIn]>
+                        <nz-statistic [nzValue]="totalExpenses" nzTitle="Total Expenses" [nzValueStyle]="{ color: '#cf1322' }"></nz-statistic>
+                        <nz-progress [nzPercent]="expensePercent" nzStrokeColor="#cf1322" nzStrokeWidth="6"></nz-progress>
+                    </nz-card>
+                </div>
+                <div nz-col nzSpan="6">
+                    <nz-card [nzBordered]="true" [@fadeIn]>
+                        <nz-statistic [nzValue]="totalSavings" nzTitle="Total Savings" [nzValueStyle]="{ color: '#1c9eff' }"></nz-statistic>
+                        <nz-progress [nzPercent]="savingsPercent" nzStrokeColor="#1c9eff" nzStrokeWidth="6"></nz-progress>
+                    </nz-card>
+                </div>
+                <div nz-col nzSpan="6">
+                    <nz-card [nzBordered]="true" [@fadeIn]>
+                        <nz-statistic [nzValue]="totalInvestments" nzTitle="Total Investments" [nzValueStyle]="{ color: '#7f53ac' }"></nz-statistic>
+                        <nz-progress [nzPercent]="investmentsPercent" nzStrokeColor="#7f53ac" nzStrokeWidth="6"></nz-progress>
+                    </nz-card>
+                </div>
+            </div>
+        </div>
+    </nz-content>
+</nz-layout> -->
+
+<nz-layout>
+    <nz-content style="
+      margin: 24px 16px;
+      padding: 24px;
+      background: #fff;
+      min-height: 85vh;
+      overflow-y: auto;
+    ">
+        <div class="content-wrapper">
+            <div nz-row [nzGutter]="16">
+                <div nz-col nzSpan="6">
+                    <nz-card [nzBordered]="true" [@fadeIn]>
+                        <nz-statistic [nzValue]="totalIncome" nzTitle="Total Income" [nzValueStyle]="{ color: '#3f8600' }"></nz-statistic>
+                        <nz-progress nzType="circle" [nzPercent]="incomePercent" nzStrokeColor="#3f8600"></nz-progress>
+                    </nz-card>
+                </div>
+                <div nz-col nzSpan="6">
+                    <nz-card [nzBordered]="true" [@fadeIn]>
+                        <nz-statistic [nzValue]="totalExpenses" nzTitle="Total Expenses" [nzValueStyle]="{ color: '#cf1322' }"></nz-statistic>
+                        <nz-progress nzType="circle" [nzPercent]="expensePercent" nzStrokeColor="#cf1322"></nz-progress>
+                    </nz-card>
+                </div>
+                <div nz-col nzSpan="6">
+                    <nz-card [nzBordered]="true" [@fadeIn]>
+                        <nz-statistic [nzValue]="totalSavings" nzTitle="Total Savings" [nzValueStyle]="{ color: '#1c9eff' }"></nz-statistic>
+                        <nz-progress nzType="circle" [nzPercent]="savingsPercent" nzStrokeColor="#1c9eff"></nz-progress>
+                    </nz-card>
+                </div>
+                <div nz-col nzSpan="6">
+                    <nz-card [nzBordered]="true" [@fadeIn]>
+                        <nz-statistic [nzValue]="totalInvestments" nzTitle="Total Investments" [nzValueStyle]="{ color: '#7f53ac' }"></nz-statistic>
+                        <nz-progress nzType="circle" [nzPercent]="investmentsPercent" nzStrokeColor="#7f53ac"></nz-progress>
+                    </nz-card>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex row">
+            <div class="col-md-6">
+                <apx-chart [series]="chartOptions.series" [chart]="chartOptions.chart" [dataLabels]="chartOptions.dataLabels" [plotOptions]="chartOptions.plotOptions" [responsive]="chartOptions.responsive" [xaxis]="chartOptions.xaxis" [legend]="chartOptions.legend" [fill]="chartOptions.fill"></apx-chart>
+            </div>
+
+            <div class="col-md-6">
+                <apx-chart [series]="piechartOptions.series" [chart]="piechartOptions.chart" [labels]="piechartOptions.labels" [responsive]="piechartOptions.responsive"></apx-chart>
+            </div>
+        </div>
+    </nz-content>
+</nz-layout>
