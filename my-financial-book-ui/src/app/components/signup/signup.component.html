@@ -1,0 +1,120 @@
+<section class="ftco-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-12 col-lg-10">
+                <div class="wrap d-md-flex">
+                    <div class="text-wrap p-4 p-lg-5 text-center d-flex align-items-center order-md-last">
+                        <div class="text w-100">
+                            <div class="icon"><span class="fa fa-soccer-ball-o"></span></div>
+                            <h2>My Finance Buddy</h2>
+                            <p>Already have an account?</p>
+                            <a routerLink="/login" class="btn btn-white btn-outline-white">Sign In</a
+              >
+            </div>
+          </div>
+          <div class="login-wrap p-4 p-md-5">
+            <h3 class="mb-4">
+              Sign Up<span>Hello!, Please signup to continue</span>
+            </h3>
+            <form
+              [formGroup]="signUpForm"
+              (ngSubmit)="submitForm()"
+              class="signup-form"
+            >
+              <div class="form-group mb-4">
+                <label class="label" for="name">Full Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="John Doe"
+                  formControlName="name"
+                />
+                <div
+                  *ngIf="signUpForm?.controls?.['name']?.touched&&signUpForm?.controls?.['name']?.errors?.['required']"
+                  class="text-danger"
+                >
+                  Name is Required
+                </div>
+              </div>
+              <div class="form-group mb-4">
+                <label class="label" for="email">Email Address</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="johndoe@gmail.com"
+                  formControlName="email"
+                />
+                <span
+                  *ngIf="signUpForm?.controls?.['email']?.touched&&signUpForm?.controls?.['email']?.errors?.['required']"
+                  class="text-danger"
+                >
+                  Email is Required
+                </span>
+              </div>
+              <div class="form-group mb-4">
+                <label class="label" for="password">Password</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  placeholder="Password"
+                  formControlName="password"
+                />
+                <div
+                  *ngIf="
+                    signUpForm.get('password')?.invalid &&
+                    signUpForm.get('password')?.touched
+                  "
+                >
+                  <div
+                    *ngIf="signUpForm.get('password')?.errors?.['required']"
+                    class="text-danger"
+                  >
+                    Password is required.
+                  </div>
+                  <div
+                    *ngIf="signUpForm.get('password')?.errors?.['minlength']"
+                    class="text-danger"
+                  >
+                    Password must be at least 8 characters long.
+                  </div>
+                </div>
+              </div>
+              <div class="form-group mb-4">
+                <label class="label" for="password">Confirm Password</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  placeholder="Confirm Password"
+                  formControlName="confirmPassword"
+                />
+                <div
+                  *ngIf="
+                signUpForm?.errors?.['mismatch'] &&
+                signUpForm.get('confirmPassword')?.touched
+              "
+                  class="text-danger"
+                >
+                  Passwords must match.
+                </div>
+              </div>
+              <div class="form-group">
+                <button
+                  type="submit"
+                  class="btn btn-primary rounded submit p-3"
+                  [disabled]="!signUpForm.valid"
+                >
+                  Sign Up
+                </button>
+              </div>
+            </form>
+            <div class="w-100 social-wrap">
+              <p class="mt-4">
+                I'm already a member! <a routerLink="/login">Sign In</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
