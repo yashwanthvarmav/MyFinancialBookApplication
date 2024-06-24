@@ -13,6 +13,7 @@ import { ToastrService } from 'ngx-toastr';
 import { Router, RouterModule } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { StorageServiceUser } from '../../auth/auth';
+import { LoaderComponent } from '../loader/loader.component';
 // import { LoaderComponent } from '../../common/loader/loader.component';
 
 @Component({
@@ -26,6 +27,7 @@ import { StorageServiceUser } from '../../auth/auth';
     HttpClientModule,
     // LoaderComponent,
     NgxLoadingModule,
+    LoaderComponent,
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
@@ -76,7 +78,10 @@ export class LoginComponent {
           this.userStorage.saveTokenValue(data?.token);
           this.userStorage.saveCurrentUser(rest);
           this.toastr.success(data?.message, 'Success');
-          this.router.navigateByUrl('/dashboard');
+          if (data.role === 'Admin') {
+            console.log('admin->');
+            this.router.navigateByUrl('/admindashboard');
+          } else this.router.navigateByUrl('/dashboard');
           this.loading = false;
         },
         error: (err) => {

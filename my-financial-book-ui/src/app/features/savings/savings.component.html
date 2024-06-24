@@ -1,5 +1,6 @@
 <nz-layout>
     <nz-content style="margin: 24px 16px; padding: 24px; background: #fff; min-height: 85vh">
+        <app-loader *ngIf="loading"></app-loader>
         <div class="w-100 d-flex justify-content-end">
             <button class="button-wrapper" nz-button nzType="primary" (click)="showModal()">
         <span class="button-wrraper-icon"
@@ -9,64 +10,124 @@
         Add Saving's
       </button>
         </div>
+        <div class="table-scroll-wrapper">
+            <nz-table #basicTable [nzData]="savingsData">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Sub Category</th>
+                        <th>Amount</th>
+                        <th>Description</th>
+                        <th>Investment Date</th>
+                        <th>Lock In Period</th>
+                        <th>Date Of Maturity</th>
+                        <th>Maturity Amount</th>
+                        <th>Next Payment Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let entry of basicTable.data">
+                        <td>{{ entry.Title }}</td>
+                        <td>{{ entry.Category.name }}</td>
+                        <td>{{ entry.SubCategory.name }}</td>
+                        <td>{{ entry.amount }}</td>
+                        <td>{{ entry.description }}</td>
+                        <td>{{ formatDate(entry.investmentStartedDate) }}</td>
+                        <td>{{ entry.lockInPeriod }}</td>
+                        <td>{{ formatDate(entry.dateOfMaturity) }}</td>
+                        <td>{{ entry.maturityAmount }}</td>
+                        <td>{{ formatDate(entry.nextPaymentDate) }}</td>
+                        <td>
+                            <div class="d-flex">
+                                <div class="delete-icon-wrapper edit-icon-wrapper" (click)="editEntry(entry)">
+                                    <i class="zmdi zmdi-edit"></i>
+                                </div>
+                                <div class="delete-icon-wrapper" (click)="deleteEntry(entry)">
+                                    <i class="zmdi zmdi-delete"></i>
+                                </div>
+                            </div>
 
-        <nz-modal [(nzVisible)]="isModalVisible" nzTitle="Add/Edit Saving" (nzOnCancel)="handleCancel()" (nzOnOk)="handleOk()">
+                            <!-- <button nz-button nzType="link" (click)="editEntry(entry)">
+            Edit
+          </button>
+                      <button nz-button nzType="link" nzDanger (click)="deleteEntry(entry)">
+            Delete
+          </button> -->
+                        </td>
+                    </tr>
+                </tbody>
+            </nz-table>
+        </div>
+        <nz-modal [(nzVisible)]="isModalVisible" [nzFooter]="modalFooter" nzTitle="Add/Edit Saving" (nzOnCancel)="handleCancel()" (nzOnOk)="handleOk()">
             <ng-container *nzModalContent>
-                <form nz-form [formGroup]="savingForm">
-                    <nz-form-item>
-                        <nz-form-label nzSm="6" nzXs="24" nzFor="date">Date</nz-form-label>
-                        <nz-form-control nzSm="14" nzXs="24">
-                            <nz-date-picker formControlName="date" nzFormat="yyyy-MM-dd"></nz-date-picker>
-                        </nz-form-control>
-                    </nz-form-item>
-                    <nz-form-item>
-                        <nz-form-label nzSm="6" nzXs="24" nzFor="amount">Amount</nz-form-label>
-                        <nz-form-control nzSm="14" nzXs="24">
-                            <input nz-input formControlName="amount" type="number" placeholder="Enter Amount" />
-                        </nz-form-control>
-                    </nz-form-item>
-                    <nz-form-item>
-                        <nz-form-label nzSm="6" nzXs="24" nzFor="description">Description</nz-form-label>
-                        <nz-form-control nzSm="14" nzXs="24">
-                            <input nz-input formControlName="description" type="text" placeholder="Enter Description" />
-                        </nz-form-control>
-                    </nz-form-item>
+                <form nz-form [formGroup]="savingForm" (ngSubmit)="submitForm()">
+                    <div class="form-floating mb-3">
+                        <input type="text" formControlName="title" class="form-control" id="title" placeholder="Title" />
+                        <label for="title">Title</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <select class="form-select" formControlName="category" id="category" aria-label="Floating label select example" (change)="onCategoryChange($event)">
+              <option value="" disabled>Select</option>
+              <option
+                *ngFor="let category of categories"
+                [value]="category?.id"
+              >
+                {{ category?.name || "" }}
+              </option>
+            </select>
+                        <label for="lineItemId">Category</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <select class="form-select" formControlName="subcategory" id="subcategory" aria-label="Floating label select example">
+              <option value="" disabled>Select</option>
+              <option *ngFor="let sub of subCategory" [value]="sub?.id">
+                {{ sub?.name || "" }}
+              </option>
+            </select>
+
+                        <label for="lineItemId">Sub Category</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <textarea class="form-control" formControlName="description" placeholder="Leave a comment here" id="floatingTextarea2" style="height: 100px"></textarea>
+                        <label for="floatingTextarea2">Description</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input type="text" formControlName="amount" class="form-control" id="amount" placeholder="Amount" />
+                        <label for="amount">Amount</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="date" formControlName="investmentStartedDate" class="form-control" id="date" placeholder="Investment StartedDate" />
+                        <label for="investmentStartedDate,">Investment StartedDate *</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="text" formControlName="lockInPeriod" class="form-control" id="lockInPeriod" placeholder="Lock In Period" />
+                        <label for="lockInPeriod">Lock In Period</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="date" formControlName="dateOfMaturity" class="form-control" id="dateOfMaturity" placeholder="Date Of Maturity" />
+                        <label for="dateOfMaturity">Date Of Maturity *</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="text" formControlName="maturityAmount" class="form-control" id="maturityAmount" placeholder="Maturity Amount" />
+                        <label for="maturityAmount">Maturity Amount</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="date" formControlName="nextPaymentDate" class="form-control" id="nextPaymentDate" placeholder="Next PaymentDate" />
+                        <label for="nextPaymentDate">Next Payment Date *</label>
+                    </div>
+
+                    <div class="submit-button-wrapper d-flex justify-content-end">
+                        <button class="button-wrapper button-wrapper-handle" type="submit">
+              Save
+            </button>
+                    </div>
                 </form>
             </ng-container>
+            <ng-template #modalFooter> </ng-template>
         </nz-modal>
-
-        <nz-table #basicTable [nzData]="savingEntries">
-            <thead>
-                <tr>
-                    <th nzWidth="20%">Date</th>
-                    <th nzWidth="20%">Amount</th>
-                    <th nzWidth="40%">Description</th>
-                    <th nzWidth="20%">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let saving of savingEntries">
-                    <td>{{ saving.date | date : "yyyy-MM-dd" }}</td>
-                    <td>{{ saving.amount }}</td>
-                    <td>{{ saving.description }}</td>
-                    <td>
-                        <!-- <button nz-button nzType="primary" nzSize="small" (click)="editEntry(saving)">
-              Edit
-            </button>
-                        <button nz-button nzType="primary" nzDanger nzSize="small" (click)="deleteEntry(saving)">
-              Delete
-            </button> -->
-                        <div class="d-flex">
-                            <div class="delete-icon-wrapper edit-icon-wrapper" (click)="editEntry(saving)">
-                                <i class="zmdi zmdi-edit"></i>
-                            </div>
-                            <div class="delete-icon-wrapper" (click)="deleteEntry(saving)">
-                                <i class="zmdi zmdi-delete"></i>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </nz-table>
     </nz-content>
 </nz-layout>

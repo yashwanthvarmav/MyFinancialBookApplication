@@ -1,12 +1,6 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './components/login/login.component';
 import { SignupComponent } from './components/signup/signup.component';
-// import { DashboardComponent } from './pages/dashboard/dashboard/dashboard.component';
-// import { HomeComponent } from './pages/home/home/home.component';
-// import { AddserviceComponent } from './pages/addservice/addservice.component';
-// import { ViewserviceComponent } from './pages/viewservice/viewservice.component';
-// import { ProfileComponent } from './pages/profile/profile.component';
-import { UserGuard } from './auth/userauth';
 import { HomeComponent } from './features/home/home.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { IncomeTrackerComponent } from './features/income-tracker/income-tracker.component';
@@ -14,6 +8,11 @@ import { ExpenseTrackerComponent } from './features/expense-tracker/expense-trac
 import { SavingsComponent } from './features/savings/savings.component';
 import { AnalyticsComponent } from './features/analytics/analytics.component';
 import { ProfileComponent } from './features/profile/profile.component';
+import { AdminGuard } from './auth/adminauth';
+import { AdminhomeComponent } from './features/admin/adminhome/adminhome.component';
+import { UserGuard } from './auth/userauth';
+import { AdmindashboardComponent } from './features/admin/admindashboard/admindashboard.component';
+import { UsersComponent } from './features/admin/users/users.component';
 
 export const routes: Routes = [
   {
@@ -56,12 +55,29 @@ export const routes: Routes = [
         path: 'profile',
         component: ProfileComponent,
       },
-      // { path: 'profile', component: ProfileComponent },
-      { path: '**', redirectTo: '/login' },
+      { path: '**', redirectTo: '/dashboard' },
     ],
   },
-  // {
-  //   path: 'home',
-  //   component: DashboardComponent,
-  // },
+  {
+    path: 'admindashboard',
+    component: AdminhomeComponent,
+    canActivate: [AdminGuard],
+    children: [
+      {
+        path: '',
+        component: AdmindashboardComponent,
+        pathMatch: 'full',
+      },
+      {
+        path: 'users',
+        component: UsersComponent,
+        pathMatch: 'full',
+      },
+      {
+        path: 'profile',
+        component: ProfileComponent,
+      },
+      { path: '**', redirectTo: '/admindashboard' },
+    ],
+  },
 ];

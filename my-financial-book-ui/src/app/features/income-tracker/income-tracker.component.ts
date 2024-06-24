@@ -1,7 +1,7 @@
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzFormModule } from 'ng-zorro-antd/form';
-import { NzModalModule } from 'ng-zorro-antd/modal';
+import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { Component } from '@angular/core';
 import { format } from 'date-fns';
 import { NgModule } from '@angular/core';
@@ -22,6 +22,7 @@ import { Router } from '@angular/router';
 import { StorageServiceUser } from '../../auth/auth';
 import { ToastrService } from 'ngx-toastr';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { LoaderComponent } from '../../components/loader/loader.component';
 
 interface IncomeEntry {
   source: string;
@@ -45,6 +46,8 @@ interface IncomeEntry {
     NzInputModule,
     NzSelectModule,
     CommonModule,
+    LoaderComponent,
+
     NzSpinModule,
   ],
   templateUrl: './income-tracker.component.html',
@@ -93,6 +96,7 @@ export class IncomeTrackerComponent {
     private fb: FormBuilder,
     private router: Router,
     private http: HttpClient,
+    private modalService: NzModalService,
     private userStorage: StorageServiceUser,
     private toastr: ToastrService
   ) {
@@ -108,7 +112,13 @@ export class IncomeTrackerComponent {
 
   onCategoryChange(event: any) {
     const selectedCategoryId = event.target.value;
+
+    const values = this.incomeForm.value;
     if (selectedCategoryId) {
+      this.incomeForm.setValue({
+        ...values,
+        subcategory: '',
+      });
       this.fetchCategoryDetails(selectedCategoryId);
     }
   }
@@ -241,22 +251,33 @@ export class IncomeTrackerComponent {
   }
 
   editEntry(entry: any): void {
+    this.fetchCategoryDetails(entry.Category.id);
     this.incomeForm.setValue({
       amount: entry.amount,
       title: entry.Title,
-      category: entry.Category,
-      subcategory: entry.SubCategory,
+      category: entry.Category.id,
+      subcategory: entry.SubCategory.id,
       description: entry.description,
       date: new Date(entry.date).toISOString().split('T')[0],
     });
     this.isModalVisible = true;
-    this.isEditing = true;
+    this.isEditing = entry.id;
     this.editingIndex = this.incomeEntries.indexOf(entry);
   }
 
   deleteEntry(entry: any): void {
     console.log('delete->', entry);
-    this.deleteIncome(entry.id);
+
+    this.modalService.confirm({
+      nzTitle: 'Confirm Delete',
+      nzContent: 'Are you sure you want to delete this income entry?',
+      nzOkText: 'Yes',
+      // nzOkType: 'danger',
+      nzOnOk: () => {
+        this.deleteIncome(entry.id);
+      },
+      nzCancelText: 'No',
+    });
   }
 
   addService() {
@@ -293,9 +314,53 @@ export class IncomeTrackerComponent {
       });
   }
 
+  editIncome() {
+    this.loading = true;
+    const values = this.incomeForm.value;
+    const data = {
+      categoryType: 'Income',
+      Title: values.title,
+      subCategoryId: values.subcategory,
+      description: values.description,
+      amount: values.amount,
+      date: values.date,
+    };
+    const headers = new HttpHeaders().set(
+      'Authorization',
+      `${window.localStorage.getItem('auth_token')}`
+    );
+    this.http
+      .put(
+        `http://localhost:3000/updateIncomeExpense/${this.isEditing}`,
+        data,
+        {
+          headers,
+        }
+      )
+      .subscribe({
+        next: (data: any) => {
+          console.log(data);
+          this.fetchIncomeData();
+          this.toastr.success(data?.message, 'Success');
+          this.loading = false;
+          this.handleCancel();
+        },
+        error: (err) => {
+          console.log(err);
+          this.loading = false;
+          this.userStorage.handleErrors(err);
+        },
+      });
+  }
+
   submitForm() {
     if (this.incomeForm.valid) {
-      this.addService();
+      if (this.isEditing) {
+        console.log('first//->', this.incomeForm);
+        this.editIncome();
+      } else {
+        this.addService();
+      }
     }
     console.log('first->', this.incomeForm);
   }
