@@ -41,9 +41,13 @@
     width: 100px;
 }
 
+.container {
+    // width: 800px;
+}
+
 .form-control {
     height: 50px;
-    border-radius: 10px;
+    border-radius: 20px;
     font-family: "Inter", sans-serif;
     display: block;
     width: 100%;
@@ -79,4 +83,8 @@
 
 .button-wrraper-icon {
     margin-right: 5px;
+}
+
+.input {
+    border-radius: 20px;
 }

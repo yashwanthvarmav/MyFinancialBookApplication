@@ -1,0 +1,33 @@
+<nz-layout>
+    <nz-content style="margin: 24px 16px; padding: 24px; background: #fff; min-height: 85vh">
+        <app-loader *ngIf="loading"></app-loader>
+        <div class="table-scroll-wrapper">
+            <nz-table #basicTable [nzData]="users">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>phone Number</th>
+                        <th>Country</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let entry of basicTable.data">
+                        <td>{{ entry.userName }}</td>
+                        <td>{{ entry.email }}</td>
+                        <td>{{ entry.role }}</td>
+                        <td>{{ entry.phoneNumber }}</td>
+                        <td>{{ entry.country }}</td>
+                        <td>
+                            <button nz-button nzType="link" nzDanger (click)="deleteEntry(entry)">
+                Delete
+              </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </nz-table>
+        </div>
+    </nz-content>
+</nz-layout>

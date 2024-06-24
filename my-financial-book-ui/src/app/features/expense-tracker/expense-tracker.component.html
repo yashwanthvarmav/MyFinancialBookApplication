@@ -1,5 +1,6 @@
 <nz-layout>
-    <nz-content style="margin: 24px 16px; padding: 24px; background: #fff">
+    <nz-content style="margin: 24px 16px; padding: 24px; background: #fff; min-height: 85vh">
+        <app-loader *ngIf="loading"></app-loader>
         <div class="w-100 d-flex justify-content-end">
             <button class="button-wrapper" nzType="primary" (click)="showModal()">
         <span class="button-wrraper-icon"
@@ -8,68 +9,91 @@
         Add New Expense
       </button>
         </div>
-        <nz-table #basicTable [nzData]="expenseEntries">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Category</th>
-                    <th>Amount</th>
-                    <th>Description</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let entry of basicTable.data">
-                    <td>{{ entry.date | date }}</td>
-                    <td>{{ entry.category }}</td>
-                    <td>{{ entry.amount }}</td>
-                    <td>{{ entry.description }}</td>
-                    <td>
-                        <button nz-button nzType="link" (click)="editEntry(entry)">
-              Edit
-            </button>
-                        <button nz-button nzType="link" nzDanger (click)="deleteEntry(entry)">
-              Delete
-            </button>
-                    </td>
-                </tr>
-            </tbody>
-        </nz-table>
-
-        <nz-modal [(nzVisible)]="isModalVisible" nzTitle="Add/Edit Expense" (nzOnCancel)="handleCancel()" (nzOnOk)="handleOk()">
+        <div class="table-scroll-wrapper">
+            <nz-table #basicTable [nzData]="expenseData">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Sub Category</th>
+                        <th>Amount</th>
+                        <th>Description</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let entry of basicTable.data">
+                        <td>{{ entry.Title }}</td>
+                        <td>{{ entry.Category.name }}</td>
+                        <td>{{ entry.SubCategory.name }}</td>
+                        <td>{{ entry.amount }}</td>
+                        <td>{{ entry.description }}</td>
+                        <td>{{ formatDate(entry.date) }}</td>
+                        <td>
+                            <button nz-button nzType="link" (click)="editEntry(entry)">
+                Edit
+              </button>
+                            <button nz-button nzType="link" nzDanger (click)="deleteEntry(entry)">
+                Delete
+              </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </nz-table>
+        </div>
+        <nz-modal [(nzVisible)]="isModalVisible" [nzFooter]="modalFooter" nzTitle="Add/Edit Saving" (nzOnCancel)="handleCancel()" (nzOnOk)="handleOk()">
             <ng-container *nzModalContent>
-                <form nz-form [formGroup]="expenseForm">
-                    <nz-form-item>
-                        <nz-form-label nzSm="6" nzXs="24" nzFor="date">Date</nz-form-label>
-                        <nz-form-control nzSm="14" nzXs="24">
-                            <nz-date-picker formControlName="date" nzFormat="yyyy-MM-dd"></nz-date-picker>
-                        </nz-form-control>
-                    </nz-form-item>
-                    <nz-form-item>
-                        <nz-form-label nzSm="6" nzXs="24" nzFor="category">Category</nz-form-label>
-                        <nz-form-control nzSm="14" nzXs="24">
-                            <nz-select formControlName="category" nzPlaceHolder="Select Category">
-                                <nz-option nzValue="Food" nzLabel="Food"></nz-option>
-                                <nz-option nzValue="Transport" nzLabel="Transport"></nz-option>
-                                <nz-option nzValue="Entertainment" nzLabel="Entertainment"></nz-option>
-                                <nz-option nzValue="Other" nzLabel="Other"></nz-option>
-                            </nz-select>
-                        </nz-form-control>
-                    </nz-form-item>
-                    <nz-form-item>
-                        <nz-form-label nzSm="6" nzXs="24" nzFor="amount">Amount</nz-form-label>
-                        <nz-form-control nzSm="14" nzXs="24">
-                            <input nz-input formControlName="amount" type="number" placeholder="Enter Amount" />
-                        </nz-form-control>
-                    </nz-form-item>
-                    <nz-form-item>
-                        <nz-form-label nzSm="6" nzXs="24" nzFor="description">Description</nz-form-label>
-                        <nz-form-control nzSm="14" nzXs="24">
-                            <input nz-input formControlName="description" type="text" placeholder="Enter Description" />
-                        </nz-form-control>
-                    </nz-form-item>
+                <form nz-form [formGroup]="expenseForm" (ngSubmit)="submitForm()">
+                    <div class="form-floating mb-3">
+                        <input type="text" formControlName="title" class="form-control" id="title" placeholder="Title" />
+                        <label for="title">Title</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <select class="form-select" formControlName="category" id="category" aria-label="Floating label select example" (change)="onCategoryChange($event)">
+              <option value="" disabled>Select</option>
+              <option
+                *ngFor="let category of categories"
+                [value]="category?.id"
+              >
+                {{ category?.name || "" }}
+              </option>
+            </select>
+                        <label for="lineItemId">Category</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <select class="form-select" formControlName="subcategory" id="subcategory" aria-label="Floating label select example">
+              <option value="" disabled>Select</option>
+              <option *ngFor="let sub of subCategory" [value]="sub?.id">
+                {{ sub?.name || "" }}
+              </option>
+            </select>
+
+                        <label for="lineItemId">Sub Category</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <textarea class="form-control" formControlName="description" placeholder="Leave a comment here" id="floatingTextarea2" style="height: 100px"></textarea>
+                        <label for="floatingTextarea2">Description</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input type="text" formControlName="amount" class="form-control" id="amount" placeholder="Amount" />
+                        <label for="amount">Amount</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="date" formControlName="date" class="form-control" id="date" placeholder="Date" />
+                        <label for="date,">Date *</label>
+                    </div>
+
+                    <div class="submit-button-wrapper d-flex justify-content-end">
+                        <button class="button-wrapper button-wrapper-handle" type="submit">
+              Save
+            </button>
+                    </div>
                 </form>
             </ng-container>
+            <ng-template #modalFooter> </ng-template>
         </nz-modal>
     </nz-content>
 </nz-layout>

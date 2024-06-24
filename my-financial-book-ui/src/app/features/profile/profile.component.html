@@ -1,40 +1,62 @@
 <nz-layout>
-    <nz-content style="margin: 24px 16px; padding: 24px; background: #fff; min-height: 85vh">
-        <div class="container mt-5">
-            <div class="card">
-                <div class="card-header header-wrapper">
-                    <h3>Edit Profile</h3>
-                </div>
-                <div class="card-body">
-                    <form (ngSubmit)="saveProfile()" #profileForm="ngForm">
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Name</label>
-                            <input type="text" class="form-control" id="name" name="name" [(ngModel)]="user.name" required />
-                        </div>
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email address</label>
-                            <input type="email" class="form-control" id="email" name="email" [(ngModel)]="user.email" required />
-                        </div>
-                        <div class="mb-3">
-                            <label for="age" class="form-label">Age</label>
-                            <input type="number" class="form-control" id="age" name="age" [(ngModel)]="user.age" required />
-                        </div>
-                        <!-- Add more fields as needed -->
+    <nz-content style="
+      margin: 24px 16px;
+      padding: 24px;
+      background: #eff2f1;
+      min-height: 85vh;
+    ">
+        <app-loader *ngIf="loading"></app-loader>
 
-                        <!-- <button type="submit" class="btn btn-primary">Save</button>
-                        <button type="button" class="btn btn-secondary ms-2" (click)="cancelEdit()">
-              Cancel -->
-                        <!-- </button> -->
-                        <div class="w-100 d-flex justify-content-end">
-                            <button class="button-wrapper" nz-button nzType="primary">
-                <!-- <span class="button-wrraper-icon"
-                  ><i class="zmdi zmdi-plus-circle"></i
-                ></span> -->
-                Save
-              </button>
+        <div class="container mt-3">
+            <div class="card-body">
+                <form (ngSubmit)="saveProfile()" [formGroup]="userForm">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="name" formControlName="userName" required />
+                        <div *ngIf="userForm?.controls?.['userName']?.touched&&userForm?.controls?.['userName']?.errors?.['required']" class="text-danger">
+                            User Name is required
                         </div>
-                    </form>
-                </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email address</label>
+                        <input type="email" class="form-control" id="email" formControlName="email" required />
+                        <div *ngIf="userForm?.controls?.['email']?.touched&&userForm?.controls?.['email']?.errors?.['required']" class="text-danger">
+                            Email address is required
+                        </div>
+                        <div *ngIf="userForm?.controls?.['email']?.touched&&userForm?.controls?.['email']?.errors?.['email']" class="text-danger">
+                            Email address is required
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="mb-3 col-sm-12 col-md-6">
+                            <label for="phonenumber" class="form-label">Phone number</label>
+                            <input type="text" class="form-control" id="phonenumber" formControlName="phoneNumber" />
+                        </div>
+                        <div class="mb-3 col-sm-12 col-md-6">
+                            <label for="dateOfBirth" class="form-label">Date of Birth</label>
+                            <input type="date" class="form-control" id="dateOfBirth" formControlName="dateOfBirth" required />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Address</label>
+                        <input type="text" class="form-control" id="address" formControlName="address" required />
+                    </div>
+                    <div class="row">
+                        <div class="mb-3 col-sm-12 col-md-6">
+                            <label for="country" class="form-label">Country</label>
+                            <input type="text" class="form-control" id="country" formControlName="country" required />
+                        </div>
+                        <div class="mb-3 col-sm-12 col-md-6">
+                            <label for="pinCode" class="form-label">Pincode</label>
+                            <input type="text" class="form-control" id="pinCode" formControlName="pinCode" required />
+                        </div>
+                    </div>
+
+                    <div class="w-100 d-flex justify-content-end">
+                        <button class="button-wrapper" type="submit">Save</button>
+                    </div>
+                </form>
             </div>
         </div>
     </nz-content>

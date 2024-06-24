@@ -12,6 +12,7 @@ import {
 import { Router, RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { StorageServiceUser } from '../../auth/auth';
+import { LoaderComponent } from '../loader/loader.component';
 
 @Component({
   selector: 'app-signup',
@@ -22,6 +23,7 @@ import { StorageServiceUser } from '../../auth/auth';
     FormsModule,
     HttpClientModule,
     RouterModule,
+    LoaderComponent,
   ],
   templateUrl: './signup.component.html',
   styleUrl: './signup.component.scss',
@@ -31,7 +33,7 @@ export class SignupComponent {
   httpClient = inject(HttpClient);
   data: Array<any> = [];
   dynamicClass = 'disable-button';
-  loader = false;
+  loading = false;
 
   constructor(
     private fb: FormBuilder,
@@ -84,16 +86,16 @@ export class SignupComponent {
         password: values?.password,
         confirmPassword: values?.confirmPassword,
       };
-      this.loader = true;
+      this.loading = true;
       this.http.post('http://localhost:3000/register', data).subscribe({
         next: (data: any) => {
           console.log(data);
           this.toastr.success(data?.message, 'Success');
-          this.loader = false;
+          this.loading = false;
           this.router.navigateByUrl('/login');
         },
         error: (err) => {
-          this.loader = false;
+          this.loading = false;
           this.userStorage.handleErrors(err);
         },
       });

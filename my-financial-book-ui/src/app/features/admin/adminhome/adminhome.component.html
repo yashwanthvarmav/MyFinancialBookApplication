@@ -3,30 +3,15 @@
         <div class="sidebar custom-navbar" [class.actived]="isActive">
             <div class="sidebar-header">
                 <p>My Financial Buddy</p>
-                <!-- <button (click)="toggleSidebar()">&times;</button> -->
             </div>
             <ul class="sidebar-list custom-navbar-nav">
-                <li [class.active1]="activeItem === 'Dashboard'" (click)="setActive('Dashboard')" routerLink="dashboard">
+                <li [class.active1]="activeItem === 'dashboard'" (click)="setActive('dashboard')" routerLink="dashboard">
                     <i class="zmdi zmdi-view-dashboard"></i>
                     <a>Dashboard</a>
                 </li>
-                <li [class.active1]="activeItem === 'About'" (click)="setActive('About')" routerLink="income-tracker">
-                    <!-- <i class="zmdi zmdi-money income-icon-wrapper"></i> -->
+                <li [class.active1]="activeItem === 'users'" (click)="setActive('users')" routerLink="users">
                     <i class="zmdi zmdi-money-box"></i>
-
-                    <a>Income Tracking</a>
-                </li>
-                <li [class.active1]="activeItem === 'Services'" (click)="setActive('Services')" routerLink="expense-tracker">
-                    <i class="zmdi zmdi-shopping-cart"></i>
-                    <a>Expense Tracking </a>
-                </li>
-                <li [class.active1]="activeItem === 'Savings'" (click)="setActive('Savings')" routerLink="savings-tracker">
-                    <i class="zmdi zmdi-balance-wallet"></i>
-                    <a>Savings & Investments</a>
-                </li>
-                <li [class.active1]="activeItem === 'analytics'" (click)="setActive('analytics')" routerLink="analytics">
-                    <i class="zmdi zmdi-chart"></i>
-                    <a> Analytics</a>
+                    <a>Users</a>
                 </li>
                 <li [class.active1]="activeItem === 'profile'" (click)="setActive('profile')" routerLink="profile">
                     <i class="zmdi zmdi-account"></i>
