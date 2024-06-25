@@ -91,10 +91,10 @@ async function validateToken(req, res, next) {
   });
 }
 
-async function getUser(data) {
+async function getUser(userId) {
   try {
-    if(!data.userId) throw new Error("User Id is required");
-    const userExists = await models.User.findByPk(data.userId);
+    if(!userId) throw new Error("User Id is required");
+    const userExists = await models.User.findByPk(userId);
     if (!userExists) throw new Error("User not Exists");
     return {
       ...omitPassword(userExists.get())

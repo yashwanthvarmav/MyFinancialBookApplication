@@ -26,6 +26,10 @@ const updateSavingsInvestmentSchema = Joi.object({
     nextPaymentDate: Joi.date()
 });
 
+const getSavingsInvestmentsSchema = Joi.object({
+    categoryId: Joi.string(),
+  });
+
 async function createSavingsInvestments(req, res) {
     try {
         let data = req.body
@@ -62,7 +66,11 @@ async function updateSavingsInvestments(req, res) {
 
 async function getSavingsInvestments(req, res) {
     try {
-        const result = await listSavingsInvestments(req.userId);
+        const { error, value } = getSavingsInvestmentsSchema.validate(req.query);
+        if (error) {
+            throw new Error(error.details[0].message);
+        }
+        const result = await listSavingsInvestments(req,query, req.userId);
         res.send(result);
     } catch(error) {
         res.statusCode = 400;
