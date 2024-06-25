@@ -1,5 +1,7 @@
 const { query } = require('express');
-const models = require('../models')
+const models = require('../models');
+const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
 
 async function createIncomeorExpense(data, userId) {
     try {
@@ -88,15 +90,23 @@ async function updateIncomeorExpense(data, id) {
 async function getIncomeorExpense (data, userId) {
     try {
         let result
-        let queryObj = {}
-        /* if (data.categoryId) {
+        let subCategoryIds = [];
+        let queryObj = { userId }
+        if (data.categoryId) {
+            subCategoryIds = await models.SubCategory.findAll({
+                attributes: ['id'],
+                where: { categoryId: data.categoryId }
+            })
+            subCategoryIds = subCategoryIds.map(ele => ele.id)
             queryObj = {
-                id:data.categoryId
+                ...queryObj,
+                subCategoryId: { [Op.in]: subCategoryIds }
             }
-        } */
+        }
+
         if (data.categoryType === 'Income') {
             result = await models.Incomes.findAndCountAll({
-                where: { userId },
+                where: queryObj,
                 include: [
                     {
                         model: models.SubCategory,
@@ -105,7 +115,6 @@ async function getIncomeorExpense (data, userId) {
                             {
                                 model: models.Category,
                                 attributes: ['id', 'name'],
-                                // where: queryObj
                             }
                         ]
                     }
@@ -113,7 +122,7 @@ async function getIncomeorExpense (data, userId) {
             })
         } else if (data.categoryType === 'Expense') {
             result = await models.Expense.findAndCountAll({
-                where: { userId },
+                where: queryObj,
                 include: [
                     {
                         model: models.SubCategory,

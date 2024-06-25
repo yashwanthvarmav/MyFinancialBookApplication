@@ -1,3 +1,4 @@
+const { query } = require('express');
 const models = require('../models');
 
 async function addSavingsInvestments (data, userId) {
@@ -31,14 +32,27 @@ async function addSavingsInvestments (data, userId) {
 }
 
 
-async function listSavingsInvestments(userId) {
+async function listSavingsInvestments(data, userId) {
     try {
         if (userId) {
             const userExists = await models.User.findByPk(userId);
             if(!userExists) throw new Error('User not found');
         }
+        let subCategoryIds = [];
+        let queryObj = { userId }
+        if (data.categoryId) {
+            subCategoryIds = await models.SubCategory.findAll({
+                attributes: ['id'],
+                where: { categoryId: data.categoryId }
+            })
+            subCategoryIds = subCategoryIds.map(ele => ele.id)
+            queryObj = {
+                ...queryObj,
+                subCategoryId: { [Op.in]: subCategoryIds }
+            }
+        }
         const savings = await models.SavingsAndInvestments.findAndCountAll({
-            where: { userId },
+            where: queryObj,
             include: [
                 {
                     model: models.SubCategory,
