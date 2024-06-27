@@ -20,11 +20,11 @@ const registerSchema = Joi.object({
 const updateProfileSchema = Joi.object({
     userName: Joi.string(),
     email: Joi.string().email(),
-    phoneNumber: Joi.string(),
-    dateOfBirth: Joi.string(),
-    address: Joi.string(),
-    country: Joi.string(),
-    pinCode: Joi.number()
+    phoneNumber: Joi.string().allow(null,''),
+    dateOfBirth: Joi.string().allow(null, ''),
+    address: Joi.string().allow(null, ''),
+    country: Joi.string().allow(null, ''),
+    pinCode: Joi.number().allow(null, '')
 });
 
 const resetPasswordSchema = Joi.object({

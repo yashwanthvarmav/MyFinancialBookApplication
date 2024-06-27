@@ -28,6 +28,8 @@ const updateSavingsInvestmentSchema = Joi.object({
 
 const getSavingsInvestmentsSchema = Joi.object({
     categoryId: Joi.string(),
+    limit: Joi.number(),
+    isSixMonths: Joi.boolean()
   });
 
 async function createSavingsInvestments(req, res) {
@@ -70,7 +72,7 @@ async function getSavingsInvestments(req, res) {
         if (error) {
             throw new Error(error.details[0].message);
         }
-        const result = await listSavingsInvestments(req,query, req.userId);
+        const result = await listSavingsInvestments(req.query, req.userId);
         res.send(result);
     } catch(error) {
         res.statusCode = 400;

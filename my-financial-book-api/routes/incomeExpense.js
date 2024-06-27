@@ -23,6 +23,7 @@ const updateDetailsSchema = Joi.object({
 const getDetailsSchema = Joi.object({
     categoryType: Joi.string().valid('Income', 'Expense').required(),
     categoryId: Joi.string(),
+    limit: Joi.number()
   });
 
 async function createDetails(req, res) {

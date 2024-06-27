@@ -1,6 +1,7 @@
 const models =  require('../models');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const logger = require('../helpers/logger');
 
 async function register(data) {
     try {
@@ -172,21 +173,20 @@ const checkRole = (roles) => {
 
 async function listUsers() {
   try {
-    const users = await models.User.findAndCountAll();
-    let result;
-    if (users.count > 0) {
-      result = users.rows.map(ele => {
-        return {
-          ...omitPassword(ele.get())
-        }
-      })
-    }
-    return {
-      count: users.count,
-      result: result
-    };
+    const users = await models.User.findAndCountAll({ where: {
+      role: {
+        [Op.ne]: 'Admin'
+      }
+    }});
+    const result = users.rows.map(ele => {
+      return {
+        ...omitPassword(ele.get())
+      }
+    })
+    logger.info(`Users fetched successfully`)
+    return result;
   } catch(error) {
-    console.log(error);
+    logger.error(error);
     throw error;
   }
 }

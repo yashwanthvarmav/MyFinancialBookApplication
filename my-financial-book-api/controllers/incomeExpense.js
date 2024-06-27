@@ -91,7 +91,12 @@ async function getIncomeorExpense (data, userId) {
     try {
         let result
         let subCategoryIds = [];
-        let queryObj = { userId }
+        let queryObj = {}
+
+        const userData = await models.User.findByPk(userId);
+        if(userData.role !== 'Admin') {
+            queryObj.userId = userId
+        }
         if (data.categoryId) {
             subCategoryIds = await models.SubCategory.findAll({
                 attributes: ['id'],
@@ -104,42 +109,41 @@ async function getIncomeorExpense (data, userId) {
             }
         }
 
+        let queryOptions = {
+            where: queryObj,
+            include: [
+                {
+                    model: models.SubCategory,
+                    attributes: ['id', 'name'],
+                    include: [
+                        {
+                            model: models.Category,
+                            attributes: ['id', 'name'],
+                        }
+                    ]
+                },
+                {
+                    model: models.User,
+                    attributes: ['id', 'userName', 'email']
+                }
+            ],
+            order: [
+                ['createdAt', 'DESC'],
+            ],
+        }
+        if (data.limit) queryOptions.limit = data.limit
+        console.log(queryOptions);
+
         if (data.categoryType === 'Income') {
-            result = await models.Incomes.findAndCountAll({
-                where: queryObj,
-                include: [
-                    {
-                        model: models.SubCategory,
-                        attributes: ['id', 'name'],
-                        include: [
-                            {
-                                model: models.Category,
-                                attributes: ['id', 'name'],
-                            }
-                        ]
-                    }
-                ]
-            })
+            result = await models.Incomes.findAndCountAll(queryOptions);
         } else if (data.categoryType === 'Expense') {
-            result = await models.Expense.findAndCountAll({
-                where: queryObj,
-                include: [
-                    {
-                        model: models.SubCategory,
-                        attributes: ['id', 'name'],
-                        include: [
-                            {
-                                model: models.Category,
-                                attributes: ['id', 'name']
-                            }
-                        ]
-                    }
-                ]
-            })
+            result = await models.Expense.findAndCountAll(queryOptions);
         }
         let response = [];
+        let sum = 0
         if (result.count > 0) {
             response = result.rows.map(ele => {
+                sum += ele.amount
                 return ({
                     id: ele.id,
                     Title: ele.Title,
@@ -151,13 +155,15 @@ async function getIncomeorExpense (data, userId) {
                     description: ele.description,
                     amount: ele.amount,
                     date: ele.date,
+                    user: ele.User,
                     createdAt: ele.createdAt,
                     updatedAt: ele.updatedAt
                 })
             })
         }
         return {
-            count: result.count,
+            count: response.length,
+            sum,
             response
         };
     } catch(error) {
@@ -184,6 +190,7 @@ async function deleteIncomeorExpense (data) {
         throw error;
     }
 }
+
 
 module.exports = {
     createIncomeorExpense,
