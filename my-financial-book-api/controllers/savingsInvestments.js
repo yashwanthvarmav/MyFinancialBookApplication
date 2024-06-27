@@ -94,18 +94,20 @@ async function listSavingsInvestments(data, userId) {
         if (data.limit) queryOptions.limit = data.limit
         const savings = await models.SavingsAndInvestments.findAndCountAll(queryOptions)
 
-        const groupedSaving = savings.rows.reduce((acc, saving) => {
-            const month = saving.createdAt.toLocaleString('default', { month: 'long', year: 'numeric' });
+        if(data.isSixMonths) {
+            const groupedSaving = savings.rows.reduce((acc, saving) => {
+            const month = saving.createdAt.toLocaleString('default', { month: 'long' });
             if (!acc[month]) {
               acc[month] = [];
             }
+
             acc[month].push(saving);
             return acc;
           }, {});
-      
-        return groupedSaving;
+          return groupedSaving;
+        }
 
-        /* let response;
+        let response;
         let sum = 0;
         if (savings.count > 0) {
             response = savings.rows.map(ele => {
@@ -136,7 +138,7 @@ async function listSavingsInvestments(data, userId) {
             count: response.length,
             sum,
             result: response
-        }; */
+        };
     } catch(error) {
         console.log(error);
         throw error;
