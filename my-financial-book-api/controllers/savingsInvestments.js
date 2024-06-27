@@ -1,5 +1,5 @@
-const { query } = require('express');
 const models = require('../models');
+const Op = require('sequelize').Op;
 
 async function addSavingsInvestments (data, userId) {
     try {
@@ -31,6 +31,12 @@ async function addSavingsInvestments (data, userId) {
     }
 }
 
+const getSixMonthsAgo = () => {
+    const now = new Date();
+    now.setUTCHours(0, 0, 0, 0);
+    return new Date(now.getFullYear(), now.getMonth() - 6, 1);
+};
+  
 
 async function listSavingsInvestments(data, userId) {
     try {
@@ -40,6 +46,7 @@ async function listSavingsInvestments(data, userId) {
         }
         let subCategoryIds = [];
         let queryObj = { userId }
+
         if (data.categoryId) {
             subCategoryIds = await models.SubCategory.findAll({
                 attributes: ['id'],
@@ -51,7 +58,17 @@ async function listSavingsInvestments(data, userId) {
                 subCategoryId: { [Op.in]: subCategoryIds }
             }
         }
-        const savings = await models.SavingsAndInvestments.findAndCountAll({
+
+        if(data.isSixMonths) {
+            const sixMonthsAgo = getSixMonthsAgo();
+            const now = new Date();
+            now.setUTCHours(0, 0, 0, 0);
+            queryObj.createdAt = {
+                [Op.between]: [sixMonthsAgo, now],
+            }
+        }
+
+        let queryOptions = {
             where: queryObj,
             include: [
                 {
@@ -60,15 +77,39 @@ async function listSavingsInvestments(data, userId) {
                     include: [
                         {
                             model: models.Category,
-                            attributes: ['id', 'name']
+                            attributes: ['id', 'name'],
                         }
                     ]
+                },
+                {
+                    model: models.User,
+                    attributes: ['id', 'userName', 'email']
                 }
-            ]
-        })
-        let response;
+            ],
+            order: [
+                ['createdAt', 'DESC'],
+            ],
+        }
+        console.log(queryObj);
+        if (data.limit) queryOptions.limit = data.limit
+        const savings = await models.SavingsAndInvestments.findAndCountAll(queryOptions)
+
+        const groupedSaving = savings.rows.reduce((acc, saving) => {
+            const month = saving.createdAt.toLocaleString('default', { month: 'long', year: 'numeric' });
+            if (!acc[month]) {
+              acc[month] = [];
+            }
+            acc[month].push(saving);
+            return acc;
+          }, {});
+      
+        return groupedSaving;
+
+        /* let response;
+        let sum = 0;
         if (savings.count > 0) {
             response = savings.rows.map(ele => {
+                sum += ele.amount
                 return ({
                     id: ele.id,
                     userId: ele.userId,
@@ -92,9 +133,10 @@ async function listSavingsInvestments(data, userId) {
             })
         }
         return {
-            count: savings.count,
+            count: response.length,
+            sum,
             result: response
-        };
+        }; */
     } catch(error) {
         console.log(error);
         throw error;

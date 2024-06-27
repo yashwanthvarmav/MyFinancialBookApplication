@@ -17,11 +17,11 @@ router.get('/subCategories', validateToken, subcategoriesListing)
 
 router.post('/addIncomeExpense', validateToken, checkRole(['User']), createDetails);
 router.put('/updateIncomeExpense/:id', validateToken, checkRole(['User']), updateDetails);
-router.get('/getIncomeExpense', validateToken, checkRole(['User']), getDetails);
+router.get('/getIncomeExpense', validateToken, checkRole(['User', 'Admin']), getDetails);
 router.delete('/deleteIncomeExpense/:categoryType/:id', validateToken, checkRole(['User']), deleteDetails);
 
 router.post('/addSavingsInvestments', validateToken, checkRole(['User']), createSavingsInvestments);
-router.get('/getSavingsInvestments', validateToken, checkRole(['User']), getSavingsInvestments)
+router.get('/getSavingsInvestments', validateToken, checkRole(['User', 'Admin']), getSavingsInvestments)
 router.put('/updateSavingsInvestments/:id', validateToken, checkRole(['User']), updateSavingsInvestments);
 router.delete('/deleteSavingsInvestments/:id', validateToken, checkRole(['User']), deleteSavingsInvestments);
 
