@@ -2,6 +2,7 @@ const { query } = require('express');
 const models = require('../models');
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
+const moment = require('moment-timezone');
 
 async function createIncomeorExpense(data, userId) {
     try {
@@ -191,7 +192,6 @@ async function deleteIncomeorExpense (data) {
     }
 }
 
-
 async function listTopTransactions (userId) {
     try {
         let subCategoryIds = [];
@@ -266,11 +266,108 @@ async function listTopTransactions (userId) {
     }
 }
 
+const getSixMonthsAgo = () => {
+    const now = new Date();
+    now.setUTCHours(0, 0, 0, 0);
+    return new Date(now.getFullYear(), now.getMonth() - 6, 1);
+};
+  
+
+async function listlastSixMonthsData(userId) {
+    try {
+        let queryObj = { }
+
+        const userData = await models.User.findByPk(userId);
+        if(userData.role !== 'Admin') {
+            queryObj.userId = userId
+        }
+
+     
+        const sixMonthsAgo = getSixMonthsAgo();
+        const now = moment().tz('UTC').add(1, 'day');
+        now.format('YYYY-MM-DD');
+        queryObj.createdAt = {
+            [Op.between]: [sixMonthsAgo, now],
+        }
+        
+
+        let queryOptions = {
+            where: queryObj,
+            include: [
+                {
+                    model: models.SubCategory,
+                    attributes: ['id', 'name'],
+                    include: [
+                        {
+                            model: models.Category,
+                        }
+                    ]
+                },
+                {
+                    model: models.User,
+                    attributes: ['id', 'userName', 'email']
+                }
+            ],
+            order: [
+                ['createdAt', 'DESC'],
+            ],
+        }
+        
+        let income = await models.Incomes.findAll(queryOptions);
+        let expense = await models.Expense.findAll(queryOptions);
+        const savings = await models.SavingsAndInvestments.findAll(queryOptions)
+
+        let result = [...income, ...expense, ...savings]
+        const groupedData = result.reduce((acc, res) => {
+            const month = res.createdAt.toLocaleString('default', { month: 'long' });
+            if (!acc[month]) {
+              acc[month] = [];
+            }
+            
+            if(res.SubCategory.Category.categoryTypeId === 1) {
+                acc[month].push({income: res.amount})
+            } else if (res.SubCategory.Category.categoryTypeId === 2) {
+                acc[month].push({expense: res.amount})
+            }
+            else if (res.SubCategory.Category.categoryTypeId === 3) acc[month].push({savingInvestment: res.amount})
+            return acc;
+        }, {});
+
+        let response = {};
+        for (const month in groupedData) {
+            if (groupedData.hasOwnProperty(month)) {
+                let incomeSum = 0;
+                let savingInvestmentSum = 0;
+    
+                groupedData[month].forEach(entry => {
+                    if (entry.income) {
+                        incomeSum += entry.income;
+                    }
+                    if (entry.savingInvestment) {
+                        savingInvestmentSum += entry.savingInvestment;
+                    }
+                });
+    
+                response[month] = {
+                    income: incomeSum,
+                    savingInvestment: savingInvestmentSum
+                };
+            }
+        }
+        return response;
+
+    } catch(error) {
+        console.log(error);
+        throw error;
+    }
+}
+
 
 module.exports = {
     createIncomeorExpense,
     updateIncomeorExpense,
     getIncomeorExpense,
     deleteIncomeorExpense,
-    listTopTransactions
+    listTopTransactions,
+    listlastSixMonthsData
 }
