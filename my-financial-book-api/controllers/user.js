@@ -9,6 +9,7 @@ async function register(data) {
             where: { email: data.email }
         })
         if (userExists) {
+          logger.error('User already registered')
             throw new Error('User already registered');
         }
         const hashPassword = await bcrypt.hashSync(data.password, 10);
@@ -18,12 +19,13 @@ async function register(data) {
             email: data.email,
             role: 'User'
         })
+        logger.info('User registered successfully');
         return {
             email: data.email,
             userName: data.userName
         }
     } catch (error) {
-        console.log(error);
+        logger.error(error)
         throw error;
     }
 }
@@ -46,6 +48,7 @@ async function login(data) {
               const token = jwt.sign({ sub: userExists.id }, process.env.secret, {
                 expiresIn: "7d",
               });
+              logger.info('User signedin successfully');
 
               return {
                 statusCode: 200,
@@ -56,6 +59,7 @@ async function login(data) {
                 }
               };
             } else {
+              logger.error('Authentication failed');
               return {
                 statusCode: 401,
                 message: {
@@ -64,6 +68,7 @@ async function login(data) {
               };
             }
           } else {
+            logger.error('Authentication failed');
             return {
               statusCode: 401,
               message: {
@@ -72,7 +77,7 @@ async function login(data) {
             };
           }
     } catch (error) {
-        console.log(error);
+      logger.error(error);
         throw error;
     }
 }
@@ -87,6 +92,7 @@ async function validateToken(req, res, next) {
       return err;
     } else {
       req.userId = decoded.sub;
+      logger.info('Token validated successfully')
       next();
     }
   });
@@ -94,14 +100,20 @@ async function validateToken(req, res, next) {
 
 async function getUser(userId) {
   try {
-    if(!userId) throw new Error("User Id is required");
+    if(!userId) {
+      logger.error("User Id is required")
+      throw new Error("User Id is required");
+    }
     const userExists = await models.User.findByPk(userId);
-    if (!userExists) throw new Error("User not Exists");
+    if (!userExists) {
+      logger.error("User not Exists")
+      throw new Error("User not Exists");
+    }
     return {
       ...omitPassword(userExists.get())
     }
   } catch(error) {
-    console.log(error);
+    logger.error(error);
     throw error;
   }
 }
@@ -118,7 +130,7 @@ async function updateUser(data, userId) {
     const user = await models.User.update(data, { where: { id: userId }});
     return user;
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     throw error;
   }
 }
@@ -130,6 +142,7 @@ async function passwordReset(email, password) {
       where: { email },
     });
     if (!user) {
+      logger.error("User not found");
       throw new Error("User not found");
     }
     
@@ -146,7 +159,7 @@ async function passwordReset(email, password) {
       email: email,
     };
   } catch (err) {
-    console.log(err);
+    logger.error(error);
     throw err;
   }
 }

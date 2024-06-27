@@ -3,13 +3,17 @@ const models = require('../models');
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 const moment = require('moment-timezone');
+const logger = require('../helpers/logger');
 
 async function createIncomeorExpense(data, userId) {
     try {
         const subCategoryExists = await models.SubCategory.findOne({
             where : { id: data.subCategoryId }
         });
-        if (!subCategoryExists) throw new Error(`Sub Category doesn't exists`);
+        if (!subCategoryExists) {
+            logger.error(`Sub Category doesn't exists`)
+            throw new Error(`Sub Category doesn't exists`);
+        }
         const categoryExists = await models.Category.findOne({
             include: [
                 {
@@ -19,7 +23,10 @@ async function createIncomeorExpense(data, userId) {
             ],
             where: { id: subCategoryExists.categoryId }
         });
-        if (categoryExists.CategoryType.name !== data.categoryType) throw new Error('Mismatch in categoryType and Category');
+        if (categoryExists.CategoryType.name !== data.categoryType) {
+            logger.error('Mismatch in categoryType and Category')
+            throw new Error('Mismatch in categoryType and Category');
+        }
         if (data.categoryType === 'Income') {
             const income = await models.Incomes.create({
                 userId: userId,
@@ -29,6 +36,7 @@ async function createIncomeorExpense(data, userId) {
                 amount: data.amount,
                 date: data.date
             })
+            logger.info('Tracking for Income created successfully')
             return income;
         } else if (data.categoryType === 'Expense') {
             const expense = await models.Expense.create({
@@ -39,10 +47,11 @@ async function createIncomeorExpense(data, userId) {
                 amount: data.amount,
                 date: data.date
             })
+            logger.info('Tracking for Expense created successfully')
             return expense;
         }
     } catch(error) {
-        console.log(error);
+        logger.error(error);
         throw error;
     }
 }
@@ -52,17 +61,26 @@ async function updateIncomeorExpense(data, id) {
         if (id) {
             if (data.categoryType === 'Income') {
                 let income = await models.Incomes.findByPk(id);
-                if (!income) throw new Error(`Income not found, Id is invalid`)
+                if (!income) {
+                    logger.error(`Income not found, Id is invalid`)
+                    throw new Error(`Income not found, Id is invalid`)
+                }
             } else if (data.categoryType === 'Expense') {
                 let expense = await models.Expense.findByPk(id);
-                if (!expense) throw new Error(`Expense not found, Id is invalid`)
+                if (!expense) {
+                    logger.error(`Expense not found, Id is invalid`)
+                    throw new Error(`Expense not found, Id is invalid`)
+                }
             }
         }
         if (data.subCategoryId) {
             const subCategoryExists = await models.SubCategory.findOne({
                 where : { id: data.subCategoryId }
             });
-            if (!subCategoryExists) throw new Error(`Sub Category doesn't exists`);
+            if (!subCategoryExists) {
+                logger.error(`Sub Category doesn't exists`)
+                throw new Error(`Sub Category doesn't exists`);
+            }
             const categoryExists = await models.Category.findOne({
                 include: [
                     {
@@ -72,18 +90,23 @@ async function updateIncomeorExpense(data, id) {
                 ],
                 where: { id: subCategoryExists.categoryId }
             });
-            if (categoryExists.CategoryType.name !== data.categoryType) throw new Error('Mismatch in categoryType and Category');
+            if (categoryExists.CategoryType.name !== data.categoryType) {
+                logger.error('Mismatch in categoryType and Category')
+                throw new Error('Mismatch in categoryType and Category');
+            }
         }
         
         if (data.categoryType === 'Income') {
             let income = await models.Incomes.update(data, { where: { id } });
+            logger.info('Tracking for Income updated successfully')
             return income;
         } else if (data.categoryType === 'Expense') {
             let expense = await models.Expense.update(data, { where: { id } });
+            logger.info('Tracking for Expense updated successfully')
             return expense;
         }
     } catch(error) {
-        console.log(error);
+        logger.error(error);
         throw error;
     }
 }
@@ -162,20 +185,24 @@ async function getIncomeorExpense (data, userId) {
                 })
             })
         }
+        logger.info(`Fetched Income or Expense list`)
         return {
             count: response.length,
             sum,
             response
         };
     } catch(error) {
-        console.log(error);
+        logger.error(error);
         throw error;
     }
 }
 
 async function deleteIncomeorExpense (data) {
     try {
-        if (data.categoryType !== 'Income' && data.categoryType !== 'Expense') throw new Error('Invalid category type');
+        if (data.categoryType !== 'Income' && data.categoryType !== 'Expense') {
+            logger.error('Invalid category type')
+            throw new Error('Invalid category type');
+        }
         if (data.categoryType === 'Income') {
             const incomeExists = await models.Incomes.findByPk(data.id);
             if (!incomeExists) throw new Error("Income not Found");
@@ -185,9 +212,10 @@ async function deleteIncomeorExpense (data) {
             if (!expenseExists) throw new Error("Expense not Found");
             await models.Expense.destroy({ where: { id: data.id }});   
         }
+        logger.info('Deleted Income or Expense successfully');
         return data.id;
     } catch(error) {
-        console.log(error);
+        logger.error(error);
         throw error;
     }
 }
@@ -255,13 +283,14 @@ async function listTopTransactions (userId) {
                 })
             })
         }
+        logger.info(`Top transactions fetched successfuly`);
         return {
             count: response.length,
             sum,
             response
         };
     } catch(error) {
-        console.log(error);
+        logger.error(error)
         throw error;
     }
 }
@@ -354,10 +383,11 @@ async function listlastSixMonthsData(userId) {
                 };
             }
         }
+        logger.info('Fetched last six months data successfully')
         return response;
 
     } catch(error) {
-        console.log(error);
+        logger.error(error)
         throw error;
     }
 }

@@ -1,4 +1,5 @@
 const models =  require('../models');
+const logger = require('../helpers/logger');
 
 
 async function listCategories({ categoryType }) {
@@ -7,24 +8,32 @@ async function listCategories({ categoryType }) {
         const categories = await models.Category.findAll({
             where: { categoryTypeId: categoryTypeExists.id }
         });
+        logger.info('Fetched categories list successfully')
         return categories;
     } catch (error) {
-        console.log(error);
+        logger.error(error);
         throw error;
     }
 }
 
 async function listSubCategories(data) {
     try {
-        if (!data.categoryId) throw new Error('CategoryId is required');
+        if (!data.categoryId) {
+            logger.error('CategoryId is required')
+            throw new Error('CategoryId is required');
+        }
         const categoryExists = await models.Category.findByPk(data.categoryId);
-        if (!categoryExists) throw new Error('Category does not exists');
+        if (!categoryExists) {
+            logger.error('Category does not exists')
+            throw new Error('Category does not exists');
+        }
         const subCategories = await models.SubCategory.findAll({
             where: { categoryId: data.categoryId }
         })
+        logger.info('Fetched sub categories list successfully')
         return subCategories;
     } catch (error) {
-         console.log(error);
+         logger.error(error);
          throw error;
     }
 }
