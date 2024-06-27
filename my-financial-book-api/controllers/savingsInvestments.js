@@ -1,3 +1,4 @@
+const logger = require('../helpers/logger');
 const models = require('../models');
 const Op = require('sequelize').Op;
 
@@ -5,12 +6,18 @@ async function addSavingsInvestments (data, userId) {
     try {
         if (userId) {
             const userExists = await models.User.findByPk(userId);
-            if(!userExists) throw new Error('User not found');
+            if(!userExists) {
+                logger.error('User not found')
+                throw new Error('User not found');
+            }
         }
         const subCategoryExists = await models.SubCategory.findOne({
             where : { id: data.subCategoryId }
         });
-        if (!subCategoryExists) throw new Error(`Sub Category doesn't exists`);
+        if (!subCategoryExists) {
+            logger.error(`Sub Category doesn't exists`)
+            throw new Error(`Sub Category doesn't exists`);
+        }
         
         const response = await models.SavingsAndInvestments.create({
             userId: userId,
@@ -24,9 +31,10 @@ async function addSavingsInvestments (data, userId) {
             maturityAmount: data.maturityAmount,
             nextPaymentDate: data.nextPaymentDate
         })
+        logger.info('Savings and Investments created successfully')
         return response;
     } catch(error) {
-        console.log(error);
+        logger.error(error);
         throw error;
     }
 }
@@ -134,13 +142,14 @@ async function listSavingsInvestments(data, userId) {
                 })
             })
         }
+        logger.info('SavingsInvestments fetched successfully')
         return {
             count: response.length,
             sum,
             result: response
         };
     } catch(error) {
-        console.log(error);
+        logger.error(error)
         throw error;
     }
 }
@@ -149,12 +158,15 @@ async function editSavingsInvestments(data, id) {
     try {
         if (id) {
             const savingsExists = await models.SavingsAndInvestments.findByPk(id);
-            if(!savingsExists) throw new Error('SavingsInvestments not found');
+            if(!savingsExists) {
+                logger.error('SavingsInvestments not found')
+                throw new Error('SavingsInvestments not found');
+            }
         }
         const savings = await models.SavingsAndInvestments.update(data, { where: {id: id } })
         return savings
     } catch (error) {
-        console.log(error);
+        logger.error(error)
         throw error;
     }
 }
@@ -163,12 +175,15 @@ async function deleteSavings ({ id }) {
     try {
         if (id) {
             const savingsExists = await models.SavingsAndInvestments.findByPk(id);
-            if(!savingsExists) throw new Error('SavingsInvestments not found');
+            if(!savingsExists) {
+                logger.error('SavingsInvestments not found')
+                throw new Error('SavingsInvestments not found');
+            }
         }
         await models.SavingsAndInvestments.destroy({ where: { id } });
         return { id };
     } catch (error) {
-        console.log(error);
+       logger.error(error);
         throw error;
     }
 }
