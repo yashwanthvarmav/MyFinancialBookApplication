@@ -3,7 +3,7 @@ const router = express.Router();
 const { registerUser, loginUser, getProfile, updateProfile, resetPassword, userListing } = require('./user')
 const { validateToken, checkRole } = require('../controllers/user')
 const { categoriesListing, subcategoriesListing } = require('./categories')
-const { createDetails, updateDetails, getDetails, deleteDetails, getIncome } = require('./incomeExpense')
+const { createDetails, updateDetails, getDetails, deleteDetails, getIncome, getTopTransactions } = require('./incomeExpense')
 const { createSavingsInvestments, getSavingsInvestments, updateSavingsInvestments, deleteSavingsInvestments } = require('./savingsInvestments')
 
 router.post('/register', registerUser);
@@ -27,6 +27,6 @@ router.delete('/deleteSavingsInvestments/:id', validateToken, checkRole(['User']
 
 
 router.get('/users', validateToken, checkRole(['Admin']), userListing);
-router.get('/income', validateToken, checkRole(['Admin']), getIncome);
-
+// router.get('/income', validateToken, checkRole(['Admin']), getIncome);
+router.get('/topTransactions', validateToken, getTopTransactions );
 module.exports = router;

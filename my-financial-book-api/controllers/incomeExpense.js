@@ -192,9 +192,85 @@ async function deleteIncomeorExpense (data) {
 }
 
 
+async function listTopTransactions (userId) {
+    try {
+        let subCategoryIds = [];
+        let queryObj = {}
+
+        const userData = await models.User.findByPk(userId);
+        if(userData.role !== 'Admin') {
+            queryObj.userId = userId
+        }
+
+        let queryOptions = {
+            where: queryObj,
+            include: [
+                {
+                    model: models.SubCategory,
+                    attributes: ['id', 'name'],
+                    include: [
+                        {
+                            model: models.Category,
+                            attributes: ['id', 'name'],
+                        }
+                    ]
+                },
+                {
+                    model: models.User,
+                    attributes: ['id', 'userName', 'email']
+                }
+            ],
+            order: [
+                ['createdAt', 'DESC'],
+            ],
+            limit: 2
+        }
+
+
+        let income = await models.Incomes.findAll(queryOptions);
+        let expense = await models.Expense.findAll(queryOptions);
+        let savings = await models.SavingsAndInvestments.findAll(queryOptions)
+        
+        let result = [...income, ...expense, ...savings]
+
+        let response = [];
+        let sum = 0
+        if (result.length > 0) {
+            response = result.map(ele => {
+                sum += ele.amount
+                return ({
+                    id: ele.id,
+                    Title: ele.Title,
+                    SubCategory: {
+                        id: ele.SubCategory.id,
+                        name: ele.SubCategory.name
+                    },
+                    Category: ele.SubCategory.Category,
+                    description: ele.description,
+                    amount: ele.amount,
+                    date: ele.date,
+                    user: ele.User,
+                    createdAt: ele.createdAt,
+                    updatedAt: ele.updatedAt
+                })
+            })
+        }
+        return {
+            count: response.length,
+            sum,
+            response
+        };
+    } catch(error) {
+        console.log(error);
+        throw error;
+    }
+}
+
+
 module.exports = {
     createIncomeorExpense,
     updateIncomeorExpense,
     getIncomeorExpense,
-    deleteIncomeorExpense
+    deleteIncomeorExpense,
+    listTopTransactions
 }
