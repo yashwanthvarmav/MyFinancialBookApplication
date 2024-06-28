@@ -1,7 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 // import { NgModule } from '@angular/core';
 
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzGridModule } from 'ng-zorro-antd/grid';
@@ -24,6 +24,9 @@ import {
   ApexFill,
   NgApexchartsModule,
 } from 'ng-apexcharts';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { StorageServiceUser } from '../../../auth/auth';
+import { ToastrService } from 'ngx-toastr';
 
 export type ChartOptions = {
   series: ApexAxisChartSeries;
@@ -65,24 +68,16 @@ export class AdmindashboardComponent {
     series: [
       {
         name: 'Savings ',
-        data: [13, 23, 20, 8, 13, 27],
-        // color: 'rgb(0, 143, 251)',
+        data: [0],
       },
       {
         name: 'Income',
-        data: [44, 55, 41, 67, 22, 43],
-        // color: 'rgb(63, 134, 0)',
+        data: [0],
       },
 
       {
-        name: 'Investments',
-        data: [11, 17, 15, 15, 21, 14],
-        // color: 'rgb(127, 83, 172)',
-      },
-      {
         name: 'Expenses',
-        data: [44, 55, 41, 67, 22, 43],
-        // color: 'rgb(255, 69, 96)',
+        data: [0],
       },
     ],
     chart: {
@@ -116,6 +111,8 @@ export class AdmindashboardComponent {
     },
   };
 
+  loading = false;
+
   piechartOptions: any = {
     series: [44, 55, 13, 43, 22],
     chart: {
@@ -136,8 +133,12 @@ export class AdmindashboardComponent {
       },
     ],
   };
-
-  constructor() {}
+  constructor(
+    private fb: FormBuilder,
+    private http: HttpClient,
+    private userStorage: StorageServiceUser,
+    private toastr: ToastrService
+  ) {}
 
   totalIncome = 5000;
   totalExpenses = 3000;
@@ -172,4 +173,144 @@ export class AdmindashboardComponent {
         this.totalSavings +
         this.totalInvestments)) *
     100;
+
+  getMonthName = (date: any) => {
+    return date.toLocaleString('default', { month: 'long' });
+  };
+
+  // Function to generate the last six months
+  generateLastSixMonths = () => {
+    const months = [];
+    const date = new Date();
+
+    for (let i = 0; i < 6; i++) {
+      months.unshift(
+        this.getMonthName(new Date(date.getFullYear(), date.getMonth() - i, 1))
+      );
+    }
+
+    return months;
+  };
+
+  handlePercentage = (
+    totalIncome: any,
+    totalExpenses: any,
+    totalSavings: any
+  ) => {
+    const incomePercent =
+      (totalIncome / (totalIncome + totalExpenses + totalSavings)) * 100;
+    const expensePercent =
+      (totalExpenses / (totalIncome + totalExpenses + totalSavings)) * 100;
+    const savingsPercent =
+      (totalSavings / (totalIncome + totalExpenses + totalSavings)) * 100;
+
+    return { incomePercent, expensePercent, savingsPercent };
+  };
+
+  handleValues = (data: any) => {
+    const lastSixMonths = this.generateLastSixMonths();
+    const savingsData: any[] = [];
+    const incomeData: any[] = [];
+    const expenseData: any[] = [];
+
+    console.log('list->', lastSixMonths);
+
+    lastSixMonths.forEach((month) => {
+      incomeData.push(data[month]?.income || 0);
+      savingsData.push(data[month]?.savingInvestment || 0);
+      expenseData.push(data[month]?.expense || 0);
+    });
+
+    this.chartOptions = {
+      ...this.chartOptions,
+      series: [
+        {
+          name: 'Savings ',
+          data: savingsData,
+        },
+        {
+          name: 'Income',
+          data: incomeData,
+        },
+        {
+          name: 'Expenses',
+          data: expenseData,
+        },
+      ],
+      xaxis: {
+        categories: lastSixMonths,
+      },
+    };
+
+    console.log('data->', incomeData, savingsData, expenseData);
+
+    // investmentsPercent =
+    //   (this.totalInvestments /
+    //     (this.totalIncome +
+    //       this.totalExpenses +
+    //       this.totalSavings +
+    //       this.totalInvestments)) *
+    //   100;
+  };
+
+  fetchExpenseData() {
+    this.loading = true;
+    const headers = new HttpHeaders().set(
+      'Authorization',
+      `${window.localStorage.getItem('auth_token')}`
+    );
+    this.http
+      .get(`http://localhost:3000/lastSixMonths`, {
+        headers,
+      })
+      .subscribe(
+        (data: any) => {
+          console.log('Selected category data:', data);
+          this.handleValues(data);
+          // this.expenseData = data.response;
+          this.loading = false;
+        },
+        (error) => {
+          console.error('Error fetching category details:', error);
+          this.loading = false;
+        }
+      );
+  }
+
+  getCategoriesData() {
+    this.loading = true;
+    const headers = new HttpHeaders().set(
+      'Authorization',
+      `${window.localStorage.getItem('auth_token')}`
+    );
+    this.http
+      .get(`http://localhost:3000/getDataCategoriesWise`, {
+        headers,
+      })
+      .subscribe(
+        (data: any) => {
+          const seriesData: any[] = [];
+          const labelsData: any[] = [];
+          console.log('category:', seriesData, labelsData, data);
+          const newdata = Object?.values(data) || [];
+          newdata?.forEach((item: any) => {
+            seriesData.push(item?.totalAmount);
+            labelsData.push(item?.categoryName);
+          });
+          console.log('category:', seriesData, labelsData, data);
+          if (seriesData?.length && labelsData?.length) {
+            this.piechartOptions = {
+              ...this.piechartOptions,
+              series: seriesData,
+              labels: labelsData,
+            };
+          }
+          this.loading = false;
+        },
+        (error) => {
+          console.error('Error fetching category details:', error);
+          this.loading = false;
+        }
+      );
+  }
 }

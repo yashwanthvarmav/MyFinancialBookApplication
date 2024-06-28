@@ -102,8 +102,8 @@ export class IncomeTrackerComponent {
   ) {
     this.incomeForm = this.fb.group({
       title: ['', [Validators.required]],
-      category: [null, [Validators.required]],
-      subcategory: [null, [Validators.required]],
+      category: ['', [Validators.required]],
+      subcategory: ['', [Validators.required]],
       description: [null, [Validators.required]],
       amount: [null, [Validators.required]],
       date: [null, [Validators.required]],
@@ -216,6 +216,7 @@ export class IncomeTrackerComponent {
         (error) => {
           console.error('Error fetching category details:', error);
           this.loading = false;
+          this.userStorage.handleErrors(error);
         }
       );
   }

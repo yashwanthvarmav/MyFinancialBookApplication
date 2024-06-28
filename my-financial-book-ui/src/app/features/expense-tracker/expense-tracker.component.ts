@@ -215,6 +215,7 @@ export class ExpenseTrackerComponent {
         (error) => {
           console.error('Error fetching category details:', error);
           this.loading = false;
+          this.userStorage.handleErrors(error);
         }
       );
   }

@@ -56,6 +56,7 @@ export class LoginComponent {
     });
 
     this.loginForm.valueChanges.subscribe(() => {
+      console.log('->', this.loginForm);
       if (this.loginForm.valid) {
         this.dynamicClass = '';
       } else {

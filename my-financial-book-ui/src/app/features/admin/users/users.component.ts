@@ -78,7 +78,7 @@ export class UsersComponent {
       .subscribe(
         (data: any) => {
           console.log('Selected category data:', data);
-          this.users = data.result;
+          this.users = data;
           this.loading = false;
         },
         (error) => {
