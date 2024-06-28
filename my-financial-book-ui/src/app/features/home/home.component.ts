@@ -18,6 +18,7 @@ import {
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { StorageServiceUser } from '../../auth/auth';
+
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -43,12 +44,13 @@ import { StorageServiceUser } from '../../auth/auth';
 export class HomeComponent {
   isActive: boolean = false;
   activeItem: string = 'Dashboard';
+  userData = localStorage.getItem('user');
+  user = this.userData ? JSON.parse(this.userData) : 'user';
 
   constructor(
     private router: Router,
-    private userStorage: StorageServiceUser
-  ) // private modalService: NzModalService
-  {}
+    private userStorage: StorageServiceUser // private modalService: NzModalService
+  ) {}
   navigateToProfile() {
     this.router.navigateByUrl('/profile');
   }

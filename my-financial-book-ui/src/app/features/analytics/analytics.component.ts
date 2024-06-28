@@ -1,7 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 // import { NgModule } from '@angular/core';
 
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzGridModule } from 'ng-zorro-antd/grid';
@@ -24,6 +24,9 @@ import {
   ApexFill,
   NgApexchartsModule,
 } from 'ng-apexcharts';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { StorageServiceUser } from '../../auth/auth';
+import { ToastrService } from 'ngx-toastr';
 
 export type ChartOptions = {
   series: ApexAxisChartSeries;
@@ -66,24 +69,15 @@ export class AnalyticsComponent {
     series: [
       {
         name: 'Savings ',
-        data: [13, 23, 20, 8, 13, 27],
-        // color: 'rgb(0, 143, 251)',
+        data: [0],
       },
       {
         name: 'Income',
-        data: [44, 55, 41, 67, 22, 43],
-        // color: 'rgb(63, 134, 0)',
-      },
-
-      {
-        name: 'Investments',
-        data: [11, 17, 15, 15, 21, 14],
-        // color: 'rgb(127, 83, 172)',
+        data: [0],
       },
       {
         name: 'Expenses',
-        data: [44, 55, 41, 67, 22, 43],
-        // color: 'rgb(255, 69, 96)',
+        data: [0],
       },
     ],
     chart: {
@@ -117,12 +111,13 @@ export class AnalyticsComponent {
     },
   };
 
+  loading = false;
   piechartOptions: any = {
-    series: [44, 55, 13, 43, 22],
+    series: [1],
     chart: {
       type: 'donut',
     },
-    labels: ['Rent', 'Groceries', 'Personal', 'Shopping', 'Maintanance'],
+    labels: ['No Data Available'],
     responsive: [
       {
         breakpoint: 480,
@@ -137,40 +132,233 @@ export class AnalyticsComponent {
       },
     ],
   };
+  role: boolean = false;
 
-  constructor() {}
+  constructor(
+    private fb: FormBuilder,
+    private http: HttpClient,
+    private userStorage: StorageServiceUser,
+    private toastr: ToastrService
+  ) {
+    this.role = !!(this.userStorage.getCurrentUser().role === 'Admin');
 
-  totalIncome = 5000;
-  totalExpenses = 3000;
-  totalSavings = 1500;
-  totalInvestments = 500;
+    console.log('hello', this.role);
+  }
 
-  incomePercent =
-    (this.totalIncome /
-      (this.totalIncome +
-        this.totalExpenses +
-        this.totalSavings +
-        this.totalInvestments)) *
-    100;
-  expensePercent =
-    (this.totalExpenses /
-      (this.totalIncome +
-        this.totalExpenses +
-        this.totalSavings +
-        this.totalInvestments)) *
-    100;
-  savingsPercent =
-    (this.totalSavings /
-      (this.totalIncome +
-        this.totalExpenses +
-        this.totalSavings +
-        this.totalInvestments)) *
-    100;
-  investmentsPercent =
-    (this.totalInvestments /
-      (this.totalIncome +
-        this.totalExpenses +
-        this.totalSavings +
-        this.totalInvestments)) *
-    100;
+  totalIncome = 0;
+  totalExpenses = 0;
+  totalSavings = 0;
+  incomePercent = 0;
+  expensePercent = 0;
+  savingsPercent = 0;
+
+  getMonthName = (date: any) => {
+    return date.toLocaleString('default', { month: 'long' });
+  };
+
+  exchangeRates: any;
+
+  getCurrenyData() {
+    this.loading = true;
+    const headers = new HttpHeaders().set(
+      'Authorization',
+      `${window.localStorage.getItem('auth_token')}`
+    );
+    this.http
+      .get(`http://localhost:3000/exchange-rates?baseCurrency=EUR`, {
+        headers,
+      })
+      .subscribe(
+        (data: any) => {
+          console.log('data->vureny->', data);
+          this.exchangeRates = data.conversion_rates;
+
+          this.loading = false;
+        },
+        (error) => {
+          console.error('Error fetching category details:', error);
+          this.loading = false;
+        }
+      );
+  }
+
+  // Function to generate the last six months
+  generateLastSixMonths = () => {
+    const months = [];
+    const date = new Date();
+
+    for (let i = 0; i < 6; i++) {
+      months.unshift(
+        this.getMonthName(new Date(date.getFullYear(), date.getMonth() - i, 1))
+      );
+    }
+
+    return months;
+  };
+
+  handlePercentage = (
+    totalIncome: any,
+    totalExpenses: any,
+    totalSavings: any
+  ) => {
+    const incomePercent =
+      (totalIncome / (totalIncome + totalExpenses + totalSavings)) * 100;
+    const expensePercent =
+      (totalExpenses / (totalIncome + totalExpenses + totalSavings)) * 100;
+    const savingsPercent =
+      (totalSavings / (totalIncome + totalExpenses + totalSavings)) * 100;
+
+    return { incomePercent, expensePercent, savingsPercent };
+  };
+
+  handleValues = (data: any) => {
+    const lastSixMonths = this.generateLastSixMonths();
+    const savingsData: any[] = [];
+    const incomeData: any[] = [];
+    const expenseData: any[] = [];
+
+    console.log('list->', lastSixMonths);
+
+    lastSixMonths.forEach((month) => {
+      incomeData.push(data[month]?.income || 0);
+      savingsData.push(data[month]?.savingInvestment || 0);
+      expenseData.push(data[month]?.expense || 0);
+    });
+
+    this.chartOptions = {
+      ...this.chartOptions,
+      series: [
+        {
+          name: 'Savings ',
+          data: savingsData,
+        },
+        {
+          name: 'Income',
+          data: incomeData,
+        },
+        {
+          name: 'Expenses',
+          data: expenseData,
+        },
+      ],
+      xaxis: {
+        categories: lastSixMonths,
+      },
+    };
+
+    console.log('data->', incomeData, savingsData, expenseData);
+
+    // investmentsPercent =
+    //   (this.totalInvestments /
+    //     (this.totalIncome +
+    //       this.totalExpenses +
+    //       this.totalSavings +
+    //       this.totalInvestments)) *
+    //   100;
+  };
+
+  fetchExpenseData() {
+    this.loading = true;
+    const headers = new HttpHeaders().set(
+      'Authorization',
+      `${window.localStorage.getItem('auth_token')}`
+    );
+    this.http
+      .get(`http://localhost:3000/lastSixMonths`, {
+        headers,
+      })
+      .subscribe(
+        (data: any) => {
+          console.log('Selected category data:', data);
+          this.handleValues(data);
+          // this.expenseData = data.response;
+          this.loading = false;
+        },
+        (error) => {
+          console.error('Error fetching category details:', error);
+          this.loading = false;
+        }
+      );
+  }
+
+  getCategoriesData() {
+    this.loading = true;
+    const headers = new HttpHeaders().set(
+      'Authorization',
+      `${window.localStorage.getItem('auth_token')}`
+    );
+    this.http
+      .get(`http://localhost:3000/getDataCategoriesWise`, {
+        headers,
+      })
+      .subscribe(
+        (data: any) => {
+          const seriesData: any[] = [];
+          const labelsData: any[] = [];
+          console.log('category:', seriesData, labelsData, data);
+          const newdata = Object?.values(data) || [];
+          newdata?.forEach((item: any) => {
+            seriesData.push(item?.totalAmount);
+            labelsData.push(item?.categoryName);
+          });
+          console.log('category:', seriesData, labelsData, data);
+          if (seriesData?.length && labelsData?.length) {
+            this.piechartOptions = {
+              ...this.piechartOptions,
+              series: seriesData,
+              labels: labelsData,
+            };
+          }
+          this.loading = false;
+        },
+        (error) => {
+          console.error('Error fetching category details:', error);
+          this.loading = false;
+        }
+      );
+  }
+
+  formatOne = (percent: number): string => `${this.expensePercent} %`;
+  formatTwo = (): string => `${this.savingsPercent} %`;
+
+  getTotalSumData() {
+    this.loading = true;
+    const headers = new HttpHeaders().set(
+      'Authorization',
+      `${window.localStorage.getItem('auth_token')}`
+    );
+    this.http
+      .get(`http://localhost:3000/totalSum`, {
+        headers,
+      })
+      .subscribe(
+        (data: any) => {
+          console.log('data->', data);
+          this.totalIncome = data.incomeSum;
+          this.totalExpenses = data.expenseSum;
+          this.totalSavings = data.savingsSum;
+
+          this.incomePercent = 100;
+          this.expensePercent = Math.floor(
+            (data.expenseSum / data.incomeSum) * 100
+          );
+          this.savingsPercent = Math.floor(
+            (data.savingsSum / data.incomeSum) * 100
+          );
+
+          this.loading = false;
+        },
+        (error) => {
+          console.error('Error fetching category details:', error);
+          this.loading = false;
+        }
+      );
+  }
+
+  ngOnInit() {
+    this.fetchExpenseData();
+    this.getCategoriesData();
+    this.getTotalSumData();
+    this.getCurrenyData();
+  }
 }

@@ -5,6 +5,37 @@
 /* Style options on hover */
 
 .table-scroll-wrapper {
-    width: 100%;
-    overflow-y: auto;
+  width: 100%;
+  overflow-y: auto;
+}
+
+.disable-button {
+  cursor: not-allowed;
+}
+
+.ant-progress-circle.ant-progress-status-success .ant-progress-text {
+  color: black;
+}
+
+.currency-wrapper {
+  margin-top: 30px;
+  overflow-y: auto;
+  height: 200px;
+  h4 {
+    margin-bottom: 4px;
+    color: rgba(0, 0, 0, 0.45);
+    font-size: 14px;
+  }
+  ul {
+    margin-top: 10px;
+    list-style: none;
+    padding-left: 0px;
+    .currency-header {
+      width: 50px;
+    }
+    .currency-value {
+      color: rgba(0, 0, 0, 0.45);
+      font-size: 14px;
+    }
+  }
 }

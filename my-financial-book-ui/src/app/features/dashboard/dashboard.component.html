@@ -1,56 +1,87 @@
 <nz-layout>
-    <nz-content style="margin: 24px 16px; padding: 24px; background: #fff">
-        <h5>Dashboard</h5>
+  <nz-content style="margin: 24px 16px; padding: 24px; background: #fff">
+    <h5>Dashboard</h5>
 
-        <div class="content-wrapper">
-            <div class="row">
-                <div class="col-sm-12 col-md-6 col-lg-3">
-                    <nz-card [nzBordered]="true" [@fadeIn]>
-                        <nz-statistic [nzValue]="totalIncome" nzTitle="Total Income" [nzValueStyle]="{ color: '#3f8600' }"></nz-statistic>
-                        <nz-progress nzType="circle" [nzPercent]="100" nzStrokeColor="#3f8600"></nz-progress>
-                    </nz-card>
-                </div>
-                <div class="col-sm-12 col-md-6 col-lg-3">
-                    <nz-card [nzBordered]="true" [@fadeIn]>
-                        <nz-statistic [nzValue]="totalExpenses" nzTitle="Total Expenses" [nzValueStyle]="{ color: '#cf1322' }"></nz-statistic>
-                        <nz-progress nzType="circle" [nzPercent]="expensePercent" nzStrokeColor="#cf1322"></nz-progress>
-                    </nz-card>
-                </div>
-                <div class="col-sm-12 col-md-6 col-lg-3">
-                    <nz-card [nzBordered]="true" [@fadeIn]>
-                        <nz-statistic [nzValue]="totalSavings" nzTitle="Total Savings" [nzValueStyle]="{ color: '#1c9eff' }"></nz-statistic>
-                        <nz-progress nzType="circle" [nzPercent]="savingsPercent" nzStrokeColor="#1c9eff"></nz-progress>
-                    </nz-card>
-                </div>
-                <div class="col-sm-12 col-md-6 col-lg-3">
-                    <nz-card [nzBordered]="true" [@fadeIn]>
-                        <nz-statistic [nzValue]="totalInvestments" nzTitle="Total Investments" [nzValueStyle]="{ color: '#7f53ac' }"></nz-statistic>
-                        <nz-progress nzType="circle" [nzPercent]="investmentsPercent" nzStrokeColor="#7f53ac"></nz-progress>
-                    </nz-card>
-                </div>
-            </div>
+    <div class="content-wrapper">
+      <div class="row">
+        <div class="col-sm-12 col-md-6 col-lg-3">
+          <nz-card [nzBordered]="true" [@fadeIn]>
+            <nz-statistic
+              [nzValue]="totalIncome"
+              nzTitle="Total Income"
+              [nzValueStyle]="{ color: '#3f8600' }"
+            ></nz-statistic>
+            <nz-progress
+              nzType="circle"
+              [nzPercent]="100"
+              nzStrokeColor="#3f8600"
+            ></nz-progress>
+          </nz-card>
         </div>
-        <div class="dashboard-recent-transactions">
-            <nz-card nzTitle="Recent Transactions">
-                <div class="table-scroll-wrapper">
-                    <nz-table #basicTable [nzData]="listOfData">
-                        <thead>
-                            <tr>
-                                <th nzWidth="25%">Date</th>
-                                <th nzWidth="50%">Description</th>
-                                <th nzWidth="25%">Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let data of basicTable.data">
-                                <td>{{ data.date }}</td>
-                                <td>{{ data.description }}</td>
-                                <td>{{ data.amount }}</td>
-                            </tr>
-                        </tbody>
-                    </nz-table>
-                </div>
-            </nz-card>
+        <div class="col-sm-12 col-md-6 col-lg-3">
+          <nz-card [nzBordered]="true" [@fadeIn]>
+            <nz-statistic
+              [nzValue]="totalExpenses"
+              nzTitle="Total Expenses"
+              [nzValueStyle]="{ color: '#cf1322' }"
+            ></nz-statistic>
+            <nz-progress
+              nzType="circle"
+              [nzPercent]="expensePercent"
+              nzStrokeColor="#cf1322"
+            ></nz-progress>
+          </nz-card>
         </div>
-    </nz-content>
+        <div class="col-sm-12 col-md-6 col-lg-3">
+          <nz-card [nzBordered]="true" [@fadeIn]>
+            <nz-statistic
+              [nzValue]="totalSavings"
+              nzTitle="Total Savings"
+              [nzValueStyle]="{ color: '#1c9eff' }"
+            ></nz-statistic>
+            <nz-progress
+              nzType="circle"
+              [nzPercent]="savingsPercent"
+              nzStrokeColor="#1c9eff"
+            ></nz-progress>
+          </nz-card>
+        </div>
+        <div class="col-sm-12 col-md-6 col-lg-3 currency-wrapper">
+          <h4>Exchange Rates (Base: EURO)</h4>
+          <ul>
+            <li *ngFor="let rate of exchangeRates | keyvalue">
+              <span class="currency-header">{{ rate.key }} </span
+              ><span class="currency-value">: {{ rate.value }}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="dashboard-recent-transactions">
+      <nz-card nzTitle="Recent Transactions">
+        <div class="table-scroll-wrapper">
+          <nz-table #basicTable [nzData]="listOfData">
+            <thead>
+              <tr>
+                <th nzWidth="25%">Title</th>
+                <th nzWidth="25%">Date</th>
+                <th nzWidth="25%">Category</th>
+                <th nzWidth="50%">Description</th>
+                <th nzWidth="25%">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let data of basicTable.data">
+                <td>{{ data.Title || "-" }}</td>
+                <td>{{ data.date ? formatDate(data.date) : "-" }}</td>
+                <td>{{ data.SubCategory.name || "-" }}</td>
+                <td>{{ data.description }}</td>
+                <td>{{ data.amount }}</td>
+              </tr>
+            </tbody>
+          </nz-table>
+        </div>
+      </nz-card>
+    </div>
+  </nz-content>
 </nz-layout>

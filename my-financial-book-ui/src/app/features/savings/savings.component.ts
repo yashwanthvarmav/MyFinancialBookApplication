@@ -346,12 +346,15 @@ export class SavingsComponent {
     this.loading = true;
     const values = this.savingForm.value;
     const data = {
-      categoryType: 'Income',
       Title: values.title,
       subCategoryId: values.subcategory,
       description: values.description,
+      maturityAmount: values.maturityAmount,
       amount: values.amount,
-      date: values.date,
+      investmentStartedDate: values.investmentStartedDate,
+      lockInPeriod: values.lockInPeriod,
+      nextPaymentDate: values.nextPaymentDate,
+      dateOfMaturity: values.dateOfMaturity,
     };
     const headers = new HttpHeaders().set(
       'Authorization',

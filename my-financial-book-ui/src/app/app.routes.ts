@@ -65,7 +65,7 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        component: AdmindashboardComponent,
+        component: AnalyticsComponent,
         pathMatch: 'full',
       },
       {

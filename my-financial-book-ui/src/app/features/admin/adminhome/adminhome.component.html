@@ -1,37 +1,49 @@
 <div class="d-flex">
-    <div>
-        <div class="sidebar custom-navbar" [class.actived]="isActive">
-            <div class="sidebar-header">
-                <p>My Financial Buddy</p>
-            </div>
-            <ul class="sidebar-list custom-navbar-nav">
-                <li [class.active1]="activeItem === 'dashboard'" (click)="setActive('dashboard')" routerLink="dashboard">
-                    <i class="zmdi zmdi-view-dashboard"></i>
-                    <a>Dashboard</a>
-                </li>
-                <li [class.active1]="activeItem === 'users'" (click)="setActive('users')" routerLink="users">
-                    <i class="zmdi zmdi-money-box"></i>
-                    <a>Users</a>
-                </li>
-                <li [class.active1]="activeItem === 'profile'" (click)="setActive('profile')" routerLink="profile">
-                    <i class="zmdi zmdi-account"></i>
-                    <a>Profile</a>
-                </li>
-                <li (click)="logout()">
-                    <i class="zmdi zmdi-sign-in"></i>
+  <div>
+    <div class="sidebar custom-navbar" [class.actived]="isActive">
+      <div class="sidebar-header">
+        <p>My Financial Buddy</p>
+      </div>
+      <ul class="sidebar-list custom-navbar-nav">
+        <li
+          [class.active1]="activeItem === 'dashboard'"
+          (click)="setActive('dashboard')"
+          routerLink="dashboard"
+        >
+          <i class="zmdi zmdi-view-dashboard"></i>
+          <a>Dashboard</a>
+        </li>
+        <li
+          [class.active1]="activeItem === 'users'"
+          (click)="setActive('users')"
+          routerLink="users"
+        >
+          <i class="zmdi zmdi-money-box"></i>
+          <a>Users</a>
+        </li>
+        <li
+          [class.active1]="activeItem === 'profile'"
+          (click)="setActive('profile')"
+          routerLink="profile"
+        >
+          <i class="zmdi zmdi-account"></i>
+          <a>Profile</a>
+        </li>
+        <li (click)="logout()">
+          <i class="zmdi zmdi-sign-in"></i>
 
-                    <a>Logout</a>
-                </li>
-            </ul>
-        </div>
+          <a>Logout</a>
+        </li>
+      </ul>
     </div>
-    <div class="w-100">
-        <div class="w-100 d-flex justify-content-between">
-            <div class="content">
-                <button class="open-btn" (click)="toggleSidebar()">☰</button>
-            </div>
-            <div class="btn-group mr-2" dropdown>
-                <span dropdownToggle>
+  </div>
+  <div class="w-100">
+    <div class="w-100 d-flex justify-content-between">
+      <div class="content">
+        <button class="open-btn" (click)="toggleSidebar()">☰</button>
+      </div>
+      <div class="btn-group mr-2" dropdown>
+        <span dropdownToggle>
           <nz-avatar
             nzIcon="user "
             nzSrc="https://img.freepik.com/free-psd/3d-illustration-human-avatar-profile_23-2150671122.jpg "
@@ -39,20 +51,26 @@
             class="avatar-wrapper"
           ></nz-avatar>
         </span>
-                <div *dropdownMenu class="dropdown-menu dropdown-menu-right" aria-labelledby="button-basic ">
-                    <li role="menuitem ">
-                        <a class="dropdown-item" (click)="navigateToProfile()">
-                            <i class="zmdi zmdi-account-circle"></i> Profile</a>
-                    </li>
+        <div
+          *dropdownMenu
+          class="dropdown-menu dropdown-menu-right"
+          aria-labelledby="button-basic "
+        >
+          <li role="menuitem ">
+            <a class="dropdown-item" routerLink="profile">
+              <i class="zmdi zmdi-account-circle"></i> Profile</a
+            >
+          </li>
 
-                    <li class="divider dropdown-divider"></li>
-                    <li role="menuitem ">
-                        <a class="dropdown-item" (click)="logout()">
-                            <i class="zmdi zmdi-long-arrow-left"></i> Logout</a>
-                    </li>
-                </div>
-            </div>
+          <li class="divider dropdown-divider"></li>
+          <li role="menuitem ">
+            <a class="dropdown-item" (click)="logout()">
+              <i class="zmdi zmdi-long-arrow-left"></i> Logout</a
+            >
+          </li>
         </div>
-        <router-outlet />
+      </div>
     </div>
+    <router-outlet />
+  </div>
 </div>
