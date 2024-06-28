@@ -3,8 +3,9 @@ const router = express.Router();
 const { registerUser, loginUser, getProfile, updateProfile, resetPassword, userListing } = require('./user')
 const { validateToken, checkRole } = require('../controllers/user')
 const { categoriesListing, subcategoriesListing } = require('./categories')
-const { createDetails, updateDetails, getDetails, deleteDetails, getTopTransactions, getlastSixMonthsData, getDataCategoriesWise } = require('./incomeExpense')
-const { createSavingsInvestments, getSavingsInvestments, updateSavingsInvestments, deleteSavingsInvestments } = require('./savingsInvestments')
+const { createDetails, updateDetails, getDetails, deleteDetails, getTopTransactions, getlastSixMonthsData, getDataCategoriesWise, getTotalSum } = require('./incomeExpense')
+const { createSavingsInvestments, getSavingsInvestments, updateSavingsInvestments, deleteSavingsInvestments } = require('./savingsInvestments');
+const { listExchangeRates } = require('./exchangeRates');
 
 router.post('/register', registerUser);
 router.post('/login', loginUser);
@@ -27,7 +28,13 @@ router.delete('/deleteSavingsInvestments/:id', validateToken, checkRole(['User']
 
 
 router.get('/users', validateToken, checkRole(['Admin']), userListing);
+
+// Dashboard APIs
 router.get('/getDataCategoriesWise', validateToken, getDataCategoriesWise);
 router.get('/topTransactions', validateToken, getTopTransactions );
-router.get('/lastSixMonths', validateToken, getlastSixMonthsData)
+router.get('/lastSixMonths', validateToken, getlastSixMonthsData);
+router.get('/totalSum', validateToken, getTotalSum);
+
+router.get('/exchange-rates', validateToken, listExchangeRates); 
+  
 module.exports = router;

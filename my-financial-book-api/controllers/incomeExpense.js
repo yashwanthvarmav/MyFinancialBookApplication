@@ -276,7 +276,7 @@ async function listTopTransactions (userId) {
                     Category: ele.SubCategory.Category,
                     description: ele.description,
                     amount: ele.amount,
-                    date: ele.date,
+                    date: ele.date || ele.investmentStartedDate,
                     user: ele.User,
                     createdAt: ele.createdAt,
                     updatedAt: ele.updatedAt
@@ -366,11 +366,15 @@ async function listlastSixMonthsData(userId) {
         for (const month in groupedData) {
             if (groupedData.hasOwnProperty(month)) {
                 let incomeSum = 0;
+                let expenseSum = 0;
                 let savingInvestmentSum = 0;
     
                 groupedData[month].forEach(entry => {
                     if (entry.income) {
                         incomeSum += entry.income;
+                    }
+                    if (entry.expense) {
+                        expenseSum += entry.expense;
                     }
                     if (entry.savingInvestment) {
                         savingInvestmentSum += entry.savingInvestment;
@@ -379,6 +383,7 @@ async function listlastSixMonthsData(userId) {
     
                 response[month] = {
                     income: incomeSum,
+                    expense: expenseSum,
                     savingInvestment: savingInvestmentSum
                 };
             }
@@ -444,6 +449,44 @@ async function listDataCategoriesWise (userId) {
     }
 }
 
+async function getIncomeExpenseSavingsSum (userId) {
+    try {
+
+        let queryObj = {}
+
+        const userData = await models.User.findByPk(userId);
+        if(userData.role !== 'Admin') {
+            queryObj.userId = userId
+        }
+
+
+        let income = await models.Incomes.findAll({where: queryObj});
+        let expense = await models.Expense.findAll({where: queryObj});
+        let savings = await models.SavingsAndInvestments.findAll({where: queryObj})
+
+        income = income.map(ele => ele.amount);
+        expense = expense.map(ele => ele.amount);
+        savings = savings.map(ele => ele.amount)
+        
+        let incomeSum =  income.reduce((totalIncome, item) => {
+            return totalIncome += item
+        }, 0);
+        let expenseSum =  expense.reduce((totalExpense, item) => {
+            return totalExpense += item
+        }, 0);
+        let savingsSum =  savings.reduce((totalSavings, item) => {
+            return totalSavings += item
+        }, 0);
+        logger.info(`Total amount fetched successfuly`);
+        return {
+            incomeSum,expenseSum,savingsSum
+        };
+    } catch(error) {
+        logger.error(error)
+        throw error;
+    }
+}
+
 
 module.exports = {
     createIncomeorExpense,
@@ -452,5 +495,6 @@ module.exports = {
     deleteIncomeorExpense,
     listTopTransactions,
     listlastSixMonthsData,
-    listDataCategoriesWise
+    listDataCategoriesWise,
+    getIncomeExpenseSavingsSum
 }
