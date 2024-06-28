@@ -1,1 +1,16 @@
 2024-06-27T21:34:25.769Z [MyFBuddy] info: Server listening at port 3000
+2024-06-28T06:07:21.377Z [MyFBuddy] info: Server listening at port 3000
+2024-06-28T06:07:24.033Z [MyFBuddy] info: Token validated successfully
+2024-06-28T06:07:24.247Z [MyFBuddy] info: Fetched last six months data successfully
+2024-06-28T06:07:35.136Z [MyFBuddy] info: Token validated successfully
+2024-06-28T06:07:35.156Z [MyFBuddy] info: Data fetched category wise successfuly
+2024-06-28T06:10:08.495Z [MyFBuddy] info: Server listening at port 3000
+2024-06-28T06:10:11.102Z [MyFBuddy] info: Token validated successfully
+2024-06-28T06:10:11.179Z [MyFBuddy] error: data is not defined
+2024-06-28T06:10:37.062Z [MyFBuddy] info: Server listening at port 3000
+2024-06-28T06:10:39.165Z [MyFBuddy] info: Token validated successfully
+2024-06-28T06:10:39.276Z [MyFBuddy] error: Cannot read properties of undefined (reading 'id')
+2024-06-28T06:11:11.987Z [MyFBuddy] info: Server listening at port 3000
+2024-06-28T06:11:13.986Z [MyFBuddy] info: Token validated successfully
+2024-06-28T06:12:47.018Z [MyFBuddy] info: Server listening at port 3000
+2024-06-28T06:12:49.373Z [MyFBuddy] info: Token validated successfully

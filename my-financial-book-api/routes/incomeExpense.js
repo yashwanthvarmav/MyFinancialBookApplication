@@ -1,5 +1,5 @@
 const Joi = require('joi');
-const { createIncomeorExpense, updateIncomeorExpense, getIncomeorExpense, deleteIncomeorExpense, listTopTransactions, listlastSixMonthsData } = require('../controllers/incomeExpense');
+const { createIncomeorExpense, updateIncomeorExpense, getIncomeorExpense, deleteIncomeorExpense, listTopTransactions, listlastSixMonthsData, listDataCategoriesWise } = require('../controllers/incomeExpense');
 const { categoryListingSchema } = require('./categories')
 
 const createDetailsSchema = Joi.object({
@@ -113,11 +113,24 @@ async function getlastSixMonthsData(req, res) {
     }
 }
 
+async function getDataCategoriesWise(req, res) {
+    try {
+        const result = await listDataCategoriesWise(req.userId);
+        res.send(result);
+    } catch(error) {
+        res.statusCode = 400;
+        res.send({
+            error: error.message
+        })
+    }
+}
+
 module.exports = {
     createDetails,
     updateDetails,
     getDetails,
     deleteDetails,
     getTopTransactions,
-    getlastSixMonthsData
+    getlastSixMonthsData,
+    getDataCategoriesWise
 }
