@@ -392,6 +392,58 @@ async function listlastSixMonthsData(userId) {
     }
 }
 
+async function listDataCategoriesWise (userId) {
+    try {
+        let subCategoryIds = [];
+        let queryObj = {}
+
+        const userData = await models.User.findByPk(userId);
+        if(userData.role !== 'Admin') {
+            queryObj.userId = userId
+        }
+
+        let queryOptions = {
+            where: queryObj,
+            include: [
+                {
+                    model: models.SubCategory,
+                    attributes: ['id', 'name'],
+                    include: [
+                        {
+                            model: models.Category,
+                            attributes: ['id', 'name'],
+                        }
+                    ]
+                }
+            ]
+        }
+
+
+        let income = await models.Incomes.findAll(queryOptions);
+        let expense = await models.Expense.findAll(queryOptions);
+        let savings = await models.SavingsAndInvestments.findAll(queryOptions)
+        
+        let result = [...income, ...expense, ...savings]
+
+        return result.reduce((acc, item) => {
+            const categoryId = item.SubCategory.Category.id;
+            if (!acc[categoryId]) {
+                acc[categoryId] = {
+                    categoryName: item.SubCategory.Category.name,
+                    totalAmount: 0
+                };
+            }
+            acc[categoryId].totalAmount += item.amount;
+            logger.info(`Data fetched category wise successfuly`);
+            return acc;
+        }, {});
+
+    } catch(error) {
+        logger.error(error)
+        throw error;
+    }
+}
+
 
 module.exports = {
     createIncomeorExpense,
@@ -399,5 +451,6 @@ module.exports = {
     getIncomeorExpense,
     deleteIncomeorExpense,
     listTopTransactions,
-    listlastSixMonthsData
+    listlastSixMonthsData,
+    listDataCategoriesWise
 }

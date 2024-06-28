@@ -3,7 +3,7 @@ const router = express.Router();
 const { registerUser, loginUser, getProfile, updateProfile, resetPassword, userListing } = require('./user')
 const { validateToken, checkRole } = require('../controllers/user')
 const { categoriesListing, subcategoriesListing } = require('./categories')
-const { createDetails, updateDetails, getDetails, deleteDetails, getTopTransactions, getlastSixMonthsData } = require('./incomeExpense')
+const { createDetails, updateDetails, getDetails, deleteDetails, getTopTransactions, getlastSixMonthsData, getDataCategoriesWise } = require('./incomeExpense')
 const { createSavingsInvestments, getSavingsInvestments, updateSavingsInvestments, deleteSavingsInvestments } = require('./savingsInvestments')
 
 router.post('/register', registerUser);
@@ -27,7 +27,7 @@ router.delete('/deleteSavingsInvestments/:id', validateToken, checkRole(['User']
 
 
 router.get('/users', validateToken, checkRole(['Admin']), userListing);
-// router.get('/income', validateToken, checkRole(['Admin']), getIncome);
+router.get('/getDataCategoriesWise', validateToken, getDataCategoriesWise);
 router.get('/topTransactions', validateToken, getTopTransactions );
 router.get('/lastSixMonths', validateToken, getlastSixMonthsData)
 module.exports = router;
